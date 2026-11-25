@@ -79,7 +79,13 @@ const ProductsAdmin = () => {
   const [newVideoPreviews, setNewVideoPreviews] = useState([]);
   const [restockId, setRestockId] = useState(null);
   const [restockQty, setRestockQty] = useState('');
-  const [nuevoColor, setNuevoColor] = useState({ nombre: '', codigo: '#000000', habilitado: true });
+  const [nuevoColor, setNuevoColor] = useState({
+    nombre: '',
+    codigo: '#000000',
+    habilitado: true,
+    imagen: { url: '', publicId: '' },
+  });
+  const [uploadingColorImg, setUploadingColorImg] = useState(null);
 
   const existingImages = editingProduct?.imagenes || [];
   const existingVideos = editingProduct?.videos || [];
@@ -144,9 +150,29 @@ const ProductsAdmin = () => {
     }
     setForm((prev) => ({
       ...prev,
-      colores: [...prev.colores, { ...nuevoColor }]
+      colores: [...prev.colores, { ...nuevoColor, imagen: nuevoColor.imagen || { url: '', publicId: '' } }],
     }));
-    setNuevoColor({ nombre: '', codigo: '#000000', habilitado: true });
+    setNuevoColor({ nombre: '', codigo: '#000000', habilitado: true, imagen: { url: '', publicId: '' } });
+  };
+
+  const uploadColorImage = async (index, file) => {
+    if (!file) return;
+    setUploadingColorImg(index);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const { url, publicId } = await uploadImage(fd).unwrap();
+      setForm((prev) => {
+        const colores = [...prev.colores];
+        colores[index] = { ...colores[index], imagen: { url, publicId } };
+        return { ...prev, colores };
+      });
+      toast.success('Imagen de color cargada');
+    } catch {
+      toast.error('Error al subir imagen del color');
+    } finally {
+      setUploadingColorImg(null);
+    }
   };
 
   const removerColor = (index) => {
@@ -453,25 +479,29 @@ const ProductsAdmin = () => {
               </div>
             </div>
 
-            {/* Colores section */}
+            {/* Colores section — optional; each color can have its own product image */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2">Colores ({form.colores.length}/8)</label>
-              
-              {/* Add new color */}
+              <label className="block text-sm font-medium mb-2">
+                Colores / variantes ({form.colores.length}/8)
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Opcional. Si cargás imagen por color, al seleccionar ese color en la tienda se muestra esa foto.
+              </p>
+
               <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-2">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Nombre del color</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Nombre</label>
                     <input
                       type="text"
                       value={nuevoColor.nombre}
                       onChange={(e) => setNuevoColor({ ...nuevoColor, nombre: e.target.value })}
                       className="input-field text-sm"
-                      placeholder="ej: Rojo, Azul oscuro"
+                      placeholder="ej: Dorado, Negro, Rosa"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Código de color</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Código</label>
                     <div className="flex gap-2">
                       <input
                         type="color"
@@ -501,7 +531,6 @@ const ProductsAdmin = () => {
                 </div>
               </div>
 
-              {/* List of colors */}
               {form.colores.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {form.colores.map((color, i) => (
@@ -511,9 +540,22 @@ const ProductsAdmin = () => {
                         style={{ backgroundColor: color.codigo }}
                         title={color.codigo}
                       />
+                      {color.imagen?.url ? (
+                        <img src={color.imagen.url} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 rounded bg-gray-200 flex-shrink-0" />
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{color.nombre}</p>
-                        <p className="text-xs text-gray-500">{color.codigo}</p>
+                        <label className="text-xs text-primary-600 cursor-pointer hover:underline">
+                          {uploadingColorImg === i ? 'Subiendo…' : 'Foto del color'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => uploadColorImage(i, e.target.files?.[0])}
+                          />
+                        </label>
                       </div>
                       <label className="flex items-center gap-1 cursor-pointer flex-shrink-0">
                         <input

@@ -1,131 +1,152 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import HeroCarousel from '../components/ui/HeroCarousel';
+import { useGetPortfolioQuery } from '../services/studioApi';
+import { useGetProductsQuery } from '../services/productsApi';
 import ProductCard from '../components/products/ProductCard';
-import { useGetProductsQuery, useGetCategoriesQuery } from '../services/productsApi';
-import { HiArrowRight, HiOutlineTruck, HiOutlineCreditCard, HiOutlineChatAlt2, HiLocationMarker } from 'react-icons/hi';
 import SEO from '../components/common/SEO';
+import { HiArrowRight } from 'react-icons/hi';
 
-const TRUST = [
-  { icon: HiOutlineTruck, title: 'Envíos a todo el país', text: 'Rápido y seguro' },
-  { icon: HiOutlineCreditCard, title: 'Mercado Pago', text: 'Tarjeta, efectivo o transferencia' },
-  { icon: HiOutlineChatAlt2, title: 'Atención por WhatsApp', text: 'Te asesoramos en minutos' },
-  { icon: HiLocationMarker, title: 'Sucursales en Morón', text: 'Retirá en el local' },
-];
+const HERO_IMG =
+  'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?auto=format&fit=crop&w=1920&q=80';
 
 const Home = () => {
-  const { data: featuredData } = useGetProductsQuery({ limit: 8, sort: 'popular' });
-  const { data: newData } = useGetProductsQuery({ limit: 8, sort: 'newest' });
-  const { data: categories = [] } = useGetCategoriesQuery();
+  const { data: portfolio = [] } = useGetPortfolioQuery({ destacado: 'true' });
+  const { data: productsData } = useGetProductsQuery({ limit: 4, sort: 'newest' });
+  const featured = portfolio.length ? portfolio.slice(0, 8) : [];
+  const products = productsData?.products || [];
+  const revealRef = useRef(null);
 
-  const schemaData = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "M Sports",
-    "url": "https://msportssl.com",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://msportssl.com/productos?search={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
-  };
+  useEffect(() => {
+    const nodes = revealRef.current?.querySelectorAll('[data-reveal]');
+    if (!nodes?.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) e.target.classList.add('animate-reveal');
+        });
+      },
+      { threshold: 0.12 }
+    );
+    nodes.forEach((n) => io.observe(n));
+    return () => io.disconnect();
+  }, [featured, products]);
 
   return (
-    <div>
+    <div ref={revealRef}>
       <SEO
-        title="M Sports | Tienda Online de Artículos Deportivos"
-        description="Encuentra la mejor selección de indumentaria y artículos deportivos en M Sports. Envíos a todo el país y las mejores marcas."
-        keywords="deportes, m sports, indumentaria deportiva, zapatillas, remeras, pantalones, articulos deportivos"
-        schemaData={schemaData}
+        title="MDFK Tattoo | Estudio de Tatuajes"
+        description="Portfolio, insumos profesionales y turnos con seña. Estudio MDFK Tattoo."
+        keywords="tatuajes, tattoo, piercing, insumos, mdfk, turnos"
       />
-      <HeroCarousel />
 
-      <section className="border-b border-pearl-dark bg-white">
-        <div className="page-wrap py-8 grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {TRUST.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary-400 text-ink flex items-center justify-center flex-shrink-0">
-                <Icon size={18} />
-              </div>
-              <div>
-                <p className="font-display font-semibold text-sm text-ink">{title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{text}</p>
-              </div>
-            </div>
-          ))}
+      {/* Hero — full-bleed, brand first */}
+      <section className="relative min-h-[88vh] flex items-end overflow-hidden">
+        <img
+          src={HERO_IMG}
+          alt="MDFK Tattoo estudio"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-pearl via-pearl/70 to-black/40" />
+        <div className="relative page-wrap pb-16 pt-32 w-full animate-slide-up">
+          <p className="section-kicker mb-3">Estudio · Portfolio · Insumos</p>
+          <h1 className="font-display text-5xl sm:text-7xl md:text-8xl font-extrabold text-ink tracking-tight leading-[0.95] mb-4">
+            MDFK<span className="text-primary-400">.</span>
+          </h1>
+          <p className="text-ink-soft text-base sm:text-lg max-w-md mb-8">
+            Tatuajes con identidad. Mirá el trabajo, reservá tu turno o llevate insumos del estudio.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link to="/trabajos" className="btn-primary">
+              Ver trabajos
+            </Link>
+            <Link to="/turnos" className="btn-secondary">
+              Reservar turno
+            </Link>
+          </div>
         </div>
       </section>
 
-      <div className="page-wrap">
-        {categories.length > 0 && (
-          <section className="pt-14">
-            <div className="flex items-end justify-between mb-6">
-              <div>
-                <p className="section-kicker mb-1">Explorá</p>
-                <h2 className="section-title">Categorías</h2>
-              </div>
-              <Link to="/productos" className="text-ink hover:text-gray-600 text-sm font-semibold flex items-center gap-1">
-                Ver todo <HiArrowRight size={16} />
+      {/* Portfolio strip */}
+      <section className="page-wrap pt-20" data-reveal style={{ opacity: 0 }}>
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <p className="section-kicker mb-1">Portfolio</p>
+            <h2 className="section-title">Trabajos recientes</h2>
+          </div>
+          <Link to="/trabajos" className="text-primary-400 hover:text-primary-300 text-sm font-semibold flex items-center gap-1">
+            Ver todo <HiArrowRight size={16} />
+          </Link>
+        </div>
+
+        {featured.length === 0 ? (
+          <p className="text-ink-soft text-sm py-12 text-center border border-dashed border-surface-border rounded-xl">
+            Pronto cargamos el portfolio desde el panel.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+            {featured.map((item) => (
+              <Link
+                key={item._id}
+                to="/trabajos"
+                className="portfolio-hover relative aspect-[3/4] overflow-hidden bg-surface group"
+              >
+                <img
+                  src={item.imagen?.url}
+                  alt={item.titulo || 'Trabajo MDFK'}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                  <div>
+                    {item.estilo && (
+                      <p className="text-[10px] uppercase tracking-widest text-primary-400 mb-0.5">{item.estilo}</p>
+                    )}
+                    <p className="text-sm font-medium text-white truncate">{item.titulo || item.artista?.nombre}</p>
+                  </div>
+                </div>
               </Link>
-            </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-              {categories.map((cat) => (
-                <Link
-                  key={cat._id}
-                  to={`/productos?categoria=${cat._id}`}
-                  className="flex-shrink-0 px-5 py-2.5 rounded-full bg-white border border-pearl-dark text-sm font-semibold text-ink hover:bg-ink hover:text-white hover:border-ink transition-colors"
-                >
-                  {cat.nombre}
-                </Link>
-              ))}
-            </div>
-          </section>
+            ))}
+          </div>
         )}
+      </section>
 
-        <section className="pt-14">
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <p className="section-kicker mb-1">Destacados</p>
-              <h2 className="section-title">Más vendidos</h2>
-            </div>
-            <Link to="/productos?sort=popular" className="text-ink hover:text-gray-600 text-sm font-semibold flex items-center gap-1">
-              Ver todo <HiArrowRight size={16} />
+      {/* CTA turnos */}
+      <section className="mt-24 relative overflow-hidden" data-reveal style={{ opacity: 0 }}>
+        <div className="page-wrap py-16 border-y border-surface-border">
+          <div className="max-w-xl">
+            <p className="section-kicker mb-2">Agenda</p>
+            <h2 className="section-title mb-3">Reservá tu turno</h2>
+            <p className="text-ink-soft text-sm mb-6">
+              Elegí artista y horario, aboná la seña por Mercado Pago o WhatsApp, y coordinamos el resto.
+            </p>
+            <Link to="/turnos" className="btn-primary inline-flex items-center gap-2">
+              Pedir turno <HiArrowRight size={16} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {(featuredData?.products || []).map((p) => <ProductCard key={p._id} product={p} />)}
-          </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="pt-14">
-          <div className="relative overflow-hidden rounded-3xl bg-ink p-8 sm:p-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 text-white">
-            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-primary-400/20 blur-2xl pointer-events-none" />
-            <div className="relative">
-              <p className="section-kicker text-primary-400 mb-2">Comprá con confianza</p>
-              <h2 className="font-display text-2xl sm:text-3xl font-extrabold mb-2">Listo para tu próximo entrenamiento</h2>
-              <p className="text-gray-400 max-w-md">Pagá por Mercado Pago o WhatsApp. Envíos a todo el país y retiro en sucursal.</p>
-            </div>
-            <Link to="/productos" className="btn-accent relative whitespace-nowrap flex-shrink-0">
-              Ver productos
-            </Link>
+      {/* Insumos preview */}
+      <section className="page-wrap py-20" data-reveal style={{ opacity: 0 }}>
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <p className="section-kicker mb-1">Tienda</p>
+            <h2 className="section-title">Insumos del estudio</h2>
           </div>
-        </section>
-
-        <section className="py-14">
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <p className="section-kicker mb-1">Recién llegados</p>
-              <h2 className="section-title">Novedades</h2>
-            </div>
-            <Link to="/productos?sort=newest" className="text-ink hover:text-gray-600 text-sm font-semibold flex items-center gap-1">
-              Ver todo <HiArrowRight size={16} />
-            </Link>
+          <Link to="/insumos" className="text-primary-400 hover:text-primary-300 text-sm font-semibold flex items-center gap-1">
+            Ver tienda <HiArrowRight size={16} />
+          </Link>
+        </div>
+        {products.length === 0 ? (
+          <p className="text-ink-soft text-sm">Sin productos cargados todavía.</p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {products.map((p) => (
+              <ProductCard key={p._id} product={p} />
+            ))}
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {(newData?.products || []).map((p) => <ProductCard key={p._id} product={p} />)}
-          </div>
-        </section>
-      </div>
+        )}
+      </section>
     </div>
   );
 };

@@ -15,24 +15,24 @@ const CartDrawer = () => {
   return (
     <>
       <div
-        className={`fixed inset-0 z-50 bg-ink/50 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+        className={`fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
         onClick={() => dispatch(closeCart())}
       />
 
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full w-full max-w-sm bg-surface border-l border-surface-border z-50 shadow-2xl flex flex-col transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-pearl-dark">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-surface-border">
           <div className="flex items-center gap-2">
             <HiOutlineShoppingBag size={20} />
             <span className="font-display font-bold text-lg">Carrito</span>
             {items.length > 0 && (
-              <span className="badge bg-primary-400 text-ink font-semibold">{items.length}</span>
+              <span className="badge bg-primary-400 text-white font-semibold">{items.length}</span>
             )}
           </div>
-          <button onClick={() => dispatch(closeCart())} className="p-1.5 rounded-full hover:bg-pearl">
+          <button onClick={() => dispatch(closeCart())} className="icon-btn">
             <HiX size={20} />
           </button>
         </div>

@@ -13,6 +13,11 @@ const colorSchema = new mongoose.Schema(
     nombre: { type: String, required: true, trim: true },
     codigo: { type: String, required: true },
     habilitado: { type: Boolean, default: true },
+    // Image shown when this color is selected (Cloudinary)
+    imagen: {
+      url: { type: String, default: '' },
+      publicId: { type: String, default: '' },
+    },
   },
   { _id: false }
 );
@@ -28,14 +33,13 @@ const productSchema = new mongoose.Schema(
     imagenes: [mediaSchema],
     videos: [mediaSchema],
     tags: [{ type: String, trim: true }],
-    
-    // Tallas y colores (max 8 colores)
+
     tallas: {
       habilitadas: [{ type: String, trim: true }],
       rango: { type: String, default: '' },
     },
     colores: [colorSchema],
-    
+
     isActive: { type: Boolean, default: true },
     deletedAt: { type: Date, default: null },
     vendidos: { type: Number, default: 0 },
@@ -43,7 +47,6 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Text index for search
 productSchema.index({ nombre: 'text', descripcion: 'text', tags: 'text' });
 
 productSchema.methods.softDelete = async function () {

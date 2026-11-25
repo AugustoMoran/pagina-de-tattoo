@@ -2,7 +2,26 @@ const crypto = require('crypto');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
+const Appointment = require('../models/Appointment');
 const { sendOrderConfirmationToUser, sendOrderNotificationToAdmin } = require('../utils/sendNotifications');
+
+const handleAppointmentPayment = async (paymentId, paymentData, status) => {
+  const appointmentId = paymentData.external_reference.replace(/^appointment:/, '');
+  const appointment = await Appointment.findById(appointmentId);
+  if (!appointment) {
+    console.error(`❌ Turno no encontrado: ${appointmentId}`);
+    return;
+  }
+  const statusMap = { approved: 'aprobado', pending: 'pendiente', rejected: 'rechazado' };
+  appointment.estadoPago = statusMap[status] || 'pendiente';
+  appointment.mpPaymentId = String(paymentId);
+  if (status === 'approved') {
+    // Still awaiting admin confirmation of the turno itself
+    appointment.estado = 'solicitado';
+  }
+  await appointment.save();
+  console.log(`💾 Turno ${appointment.codigo} pago → ${appointment.estadoPago}`);
+};
 
 const mercadopagoWebhook = async (req, res, next) => {
   try {
@@ -102,6 +121,12 @@ const mercadopagoWebhook = async (req, res, next) => {
       const status = paymentData.status; // approved, pending, rejected
 
       console.log(`🔍 Pago ${paymentId}: status=${status}, externalRef=${externalRef}`);
+
+      // Appointment seña payments use external_reference "appointment:<id>"
+      if (typeof externalRef === 'string' && externalRef.startsWith('appointment:')) {
+        await handleAppointmentPayment(paymentId, paymentData, status);
+        return res.sendStatus(200);
+      }
 
       // 🔴 VALIDACIÓN CRÍTICA: Si el pago NO está aprobado, SOLO actualizar estado y salir
       if (status !== 'approved') {

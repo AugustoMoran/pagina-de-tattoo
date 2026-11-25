@@ -14,7 +14,7 @@ const SESSION_ID = `session_${Date.now()}_${Math.random().toString(36).slice(2, 
 const INITIAL_MESSAGE = {
   id:   'init',
   role: 'assistant',
-  text: '¡Hola! 👋 Soy tu asistente de compras. Puedo ayudarte a encontrar productos, consultar precios y recomendarte opciones. ¿Qué estás buscando?',
+  text: 'Hola — soy el asistente de MDFK Tattoo. Te ayudo con insumos, cuidados, portfolio y cómo pedir un turno con seña.',
   products: [],
   actions:  [],
 };
@@ -31,7 +31,7 @@ function ProductCard({ product, onAddToCart, onBuyNow }) {
   const price = Number.isFinite(priceNum) && priceNum > 0 ? formatCurrency(priceNum) : 'Sin precio';
 
   return (
-    <div className="flex flex-col gap-1.5 p-2 rounded-lg border border-pearl-dark bg-white hover:border-primary-400 transition-colors w-full">
+    <div className="flex flex-col gap-1.5 p-2 rounded-lg border border-surface-border bg-surface hover:border-primary-400 transition-colors w-full">
       {/* Top row: image, name, price */}
       <div className="flex items-start gap-2">
         {image ? (
@@ -56,7 +56,7 @@ function ProductCard({ product, onAddToCart, onBuyNow }) {
       <div className="flex gap-1">
         <button
           onClick={() => onAddToCart(product)}
-          className="flex-1 px-2 py-1 text-xs rounded-md bg-primary-400 hover:bg-primary-500 text-ink font-medium transition-colors flex items-center justify-center gap-1"
+          className="flex-1 px-2 py-1 text-xs rounded-md bg-primary-400 hover:bg-primary-500 text-white font-medium transition-colors flex items-center justify-center gap-1"
           title="Agregar al carrito"
         >
           <FiShoppingCart size={12} />
@@ -64,7 +64,7 @@ function ProductCard({ product, onAddToCart, onBuyNow }) {
         </button>
         <button
           onClick={() => onBuyNow(product)}
-          className="flex-1 px-2 py-1 text-xs rounded-md bg-ink hover:bg-ink/80 text-white font-medium transition-colors flex items-center justify-center gap-1"
+          className="flex-1 px-2 py-1 text-xs rounded-md bg-white/10 hover:bg-white/20 text-ink font-medium transition-colors flex items-center justify-center gap-1"
           title="Comprar ahora"
         >
           <FiArrowRight size={12} />
@@ -92,8 +92,8 @@ function Message({ msg, onAddToCart, onBuyNow }) {
         <div
           className={`px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
             isUser
-              ? 'bg-primary-400 text-ink rounded-tr-sm'
-              : 'bg-white border border-pearl-dark text-ink rounded-tl-sm shadow-sm'
+              ? 'bg-primary-400 text-white rounded-tr-sm'
+              : 'bg-pearl-dark border border-surface-border text-ink rounded-tl-sm'
           }`}
         >
           {msg.text}
@@ -110,6 +110,22 @@ function Message({ msg, onAddToCart, onBuyNow }) {
                 onBuyNow={onBuyNow}
               />
             ))}
+          </div>
+        )}
+
+        {msg.actions?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {msg.actions.map((a, i) =>
+              a.href ? (
+                <a
+                  key={i}
+                  href={a.href}
+                  className="text-xs px-2.5 py-1 rounded-lg border border-primary-400 text-primary-400 hover:bg-primary-400 hover:text-white transition-colors"
+                >
+                  {a.label || 'Ir'}
+                </a>
+              ) : null
+            )}
           </div>
         )}
       </div>
@@ -259,25 +275,26 @@ export default function ChatWidget() {
   // ── Quick suggestions shown only on the first interaction ─────────────────
   const showSuggestions = messages.length === 1;
   const suggestions = [
-    '¿Qué tienen disponible?',
-    'Busco algo para regalo',
-    'Ver productos en oferta',
+    'Hacen realismo?',
+    'Quiero tatuarme la espalda',
+    'Aritos / piercing',
+    'Quiero pedir un turno',
   ];
 
   return (
     <>
       {/* ── Chat window ───────────────────────────────────────────────────── */}
       {open && (
-        <div className="fixed bottom-24 right-4 z-50 w-[340px] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl shadow-2xl overflow-hidden bg-pearl border border-pearl-dark animate-slide-up">
+        <div className="fixed bottom-24 right-4 z-50 w-[340px] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl shadow-2xl overflow-hidden bg-surface border border-surface-border animate-slide-up">
 
           {/* Header */}
-          <div className="flex items-center gap-2.5 px-4 py-3 bg-ink text-white">
+          <div className="flex items-center gap-2.5 px-4 py-3 bg-pearl-dark border-b border-surface-border text-ink">
             <div className="w-8 h-8 rounded-full bg-primary-400 flex items-center justify-center">
-              <RiRobot2Line size={18} className="text-ink" />
+              <RiRobot2Line size={18} className="text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm leading-tight">Asistente de compras</p>
-              <p className="text-xs text-white/60 leading-tight">
+              <p className="font-semibold text-sm leading-tight">Asistente MDFK</p>
+              <p className="text-xs text-ink-soft leading-tight">
                 {loading ? 'Escribiendo...' : 'En línea'}
               </p>
             </div>
@@ -319,7 +336,7 @@ export default function ChatWidget() {
                 <button
                   key={s}
                   onClick={() => { setInput(s); setTimeout(handleSend, 0); }}
-                  className="text-xs px-2.5 py-1 rounded-full border border-primary-400 text-primary-600 hover:bg-primary-400 hover:text-ink transition-colors"
+                  className="text-xs px-2.5 py-1 rounded-lg border border-primary-400 text-primary-400 hover:bg-primary-400 hover:text-white transition-colors"
                 >
                   {s}
                 </button>
@@ -337,7 +354,7 @@ export default function ChatWidget() {
               placeholder="Escribí tu consulta..."
               rows={1}
               disabled={loading}
-              className="flex-1 resize-none rounded-xl border border-pearl-dark bg-white px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:border-primary-400 transition-colors disabled:opacity-60 max-h-24 overflow-y-auto"
+              className="flex-1 resize-none rounded-xl border border-surface-border bg-pearl px-3 py-2 text-sm text-ink placeholder:text-ink-soft/50 focus:outline-none focus:border-primary-400 transition-colors disabled:opacity-60 max-h-24 overflow-y-auto"
               style={{ lineHeight: '1.4' }}
             />
             <button
@@ -346,7 +363,7 @@ export default function ChatWidget() {
               className="w-9 h-9 rounded-xl bg-primary-400 flex items-center justify-center hover:bg-primary-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
               aria-label="Enviar"
             >
-              <FiSend size={15} className="text-ink" />
+              <FiSend size={15} className="text-white" />
             </button>
           </div>
         </div>
@@ -355,13 +372,13 @@ export default function ChatWidget() {
       {/* ── Floating toggle button ─────────────────────────────────────────── */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95 bg-ink relative"
-        aria-label={open ? 'Cerrar chat' : 'Abrir asistente de compras'}
+        className="w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95 bg-primary-400 relative"
+        aria-label={open ? 'Cerrar chat' : 'Abrir asistente MDFK'}
       >
         {open ? (
           <FiX size={20} color="white" />
         ) : (
-          <RiRobot2Line size={22} color="#FACC15" />
+          <RiRobot2Line size={22} color="white" />
         )}
 
         {/* Unread badge */}

@@ -25,6 +25,10 @@ const popupRoutes = require('./src/routes/popup');
 const chatRoutes = require('./src/routes/chat');
 const testRoutes = require('./src/routes/test');
 const seoRoutes = require('./src/routes/seo');
+const artistRoutes = require('./src/routes/artists');
+const portfolioRoutes = require('./src/routes/portfolio');
+const appointmentRoutes = require('./src/routes/appointments');
+const settingsRoutes = require('./src/routes/settings');
 
 const app = express();
 
@@ -120,6 +124,10 @@ app.use('/api/banners', bannerRoutes);
 app.use('/api/popup', popupRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/test', testRoutes);
+app.use('/api/artists', artistRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/settings', settingsRoutes);
 app.use('/', seoRoutes);
 
 // Health check

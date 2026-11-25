@@ -33,8 +33,8 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <Link to={`/productos/${product._id}`} className="group card flex flex-col h-full hover:-translate-y-1 hover:shadow-card-hover transition-all duration-300">
-      <div className="relative overflow-hidden aspect-square bg-pearl">
+    <Link to={`/insumos/${product._id}`} className="group card flex flex-col h-full hover:-translate-y-0.5 hover:border-primary-400/40 transition-all duration-300">
+      <div className="relative overflow-hidden aspect-square bg-pearl-dark">
         <img
           src={image}
           alt={product.nombre}

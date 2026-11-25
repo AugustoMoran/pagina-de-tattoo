@@ -7,11 +7,13 @@ import { useSyncCartMutation } from '../services/cartApi';
 import { clearGuestCart, selectCartItems } from '../features/cart/cartSlice';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import { HiEye, HiEyeOff } from 'react-icons/hi';
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
   const [syncCart] = useSyncCartMutation();
   const guestItems = useSelector(selectCartItems);
@@ -34,7 +36,7 @@ const Login = () => {
       }
 
       toast.success(`¡Bienvenido, ${result.user.nombre}!`);
-      navigate('/');
+      navigate(result.user?.role === 'admin' ? '/admin' : '/');
     } catch (err) {
       toast.error(err?.data?.message || 'Error al iniciar sesión');
     }
@@ -45,14 +47,16 @@ const Login = () => {
       <div className="w-full max-w-md">
         <div className="card p-8 sm:p-10">
           <div className="text-center mb-8">
-            <img src="/m-sports-logo.png" alt="M Sports" className="h-14 w-auto mx-auto mb-5 object-contain" />
+            <p className="font-display text-3xl font-extrabold text-ink mb-3">
+              MDFK<span className="text-primary-400">.</span>
+            </p>
             <h1 className="font-display text-2xl font-bold text-ink">Iniciar sesión</h1>
-            <p className="text-gray-500 text-sm mt-1">Accedé a tu cuenta</p>
+            <p className="text-ink-soft text-sm mt-1">Accedé a tu cuenta</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-ink-soft mb-1.5">Email</label>
               <input
                 type="email"
                 name="email"
@@ -65,17 +69,27 @@ const Login = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contraseña</label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                className="input-field"
-                placeholder="••••••••"
-                required
-                autoComplete="current-password"
-              />
+              <label className="block text-sm font-medium text-ink-soft mb-1.5">Contraseña</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  className="input-field pr-11"
+                  placeholder="••••••••"
+                  required
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft hover:text-ink p-1"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
+                </button>
+              </div>
             </div>
 
             <button type="submit" disabled={isLoading} className="btn-primary w-full py-3 mt-2">
@@ -83,9 +97,9 @@ const Login = () => {
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p className="text-center text-sm text-ink-soft mt-6">
             ¿No tenés cuenta?{' '}
-            <Link to="/registro" className="text-ink font-semibold hover:underline">
+            <Link to="/registro" className="text-primary-400 font-semibold hover:underline">
               Registrate
             </Link>
           </p>

@@ -1,29 +1,38 @@
 import React from 'react';
 import { Link, useLocation, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser, selectIsAdmin } from '../../features/auth/authSlice';
+import { selectIsAdmin } from '../../features/auth/authSlice';
 import {
   HiOutlineViewGrid,
   HiOutlineCube,
   HiOutlineTag,
   HiOutlineClipboardList,
-  HiOutlineTruck,
   HiOutlineTicket,
   HiOutlinePhotograph,
   HiOutlineCollection,
   HiOutlineHome,
   HiOutlineChatAlt2,
+  HiOutlineUserGroup,
+  HiOutlineCalendar,
+  HiOutlineClock,
+  HiOutlineColorSwatch,
+  HiOutlineCog,
 } from 'react-icons/hi';
 
 const NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', icon: HiOutlineViewGrid, exact: true },
-  { to: '/admin/productos', label: 'Productos', icon: HiOutlineCube },
+  { to: '/admin/turnos', label: 'Solicitudes', icon: HiOutlineCalendar },
+  { to: '/admin/agenda', label: 'Agenda', icon: HiOutlineClock },
+  { to: '/admin/artistas', label: 'Artistas', icon: HiOutlineUserGroup },
+  { to: '/admin/portfolio', label: 'Portfolio', icon: HiOutlineColorSwatch },
+  { to: '/admin/productos', label: 'Insumos', icon: HiOutlineCube },
   { to: '/admin/categorias', label: 'Categorías', icon: HiOutlineTag },
   { to: '/admin/ordenes', label: 'Pedidos', icon: HiOutlineClipboardList },
   { to: '/admin/cupones', label: 'Cupones', icon: HiOutlineTicket },
-  { to: '/admin/cloudinary', label: 'Almacenamiento', icon: HiOutlinePhotograph },
   { to: '/admin/banners', label: 'Banners', icon: HiOutlineCollection },
   { to: '/admin/popup', label: 'Popup WhatsApp', icon: HiOutlineChatAlt2 },
+  { to: '/admin/cloudinary', label: 'Almacenamiento', icon: HiOutlinePhotograph },
+  { to: '/admin/configuracion', label: 'Configuración', icon: HiOutlineCog },
 ];
 
 const AdminLayout = ({ children }) => {
@@ -33,21 +42,23 @@ const AdminLayout = ({ children }) => {
   if (!isAdmin) return <Navigate to="/" replace />;
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-56 bg-ink text-gray-100 flex-shrink-0 hidden md:flex flex-col">
-        <div className="px-5 py-5 border-b border-white/10">
-          <p className="font-display font-bold text-white">Panel Admin</p>
-          <p className="text-[11px] text-primary-400 mt-0.5 tracking-wide">M Sports</p>
+    <div className="flex min-h-screen bg-pearl text-ink">
+      <aside className="w-56 bg-surface border-r border-surface-border flex-shrink-0 hidden md:flex flex-col">
+        <div className="px-5 py-5 border-b border-surface-border">
+          <p className="font-display font-bold text-ink">Panel Admin</p>
+          <p className="text-[11px] text-primary-400 mt-0.5 tracking-wide">MDFK Tattoo</p>
         </div>
-        <nav className="flex-1 py-4 space-y-1 px-3">
+        <nav className="flex-1 py-4 space-y-0.5 px-3 overflow-y-auto">
           {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => {
             const active = exact ? location.pathname === to : location.pathname.startsWith(to);
             return (
               <Link
                 key={to}
                 to={to}
-                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-                  active ? 'bg-primary-400 text-gray-900 font-semibold' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  active
+                    ? 'bg-primary-400/15 text-primary-400 font-semibold'
+                    : 'text-ink-soft hover:bg-white/5 hover:text-ink'
                 }`}
               >
                 <Icon size={18} />
@@ -56,16 +67,15 @@ const AdminLayout = ({ children }) => {
             );
           })}
         </nav>
-        <div className="px-3 py-4 border-t border-white/10">
-          <Link to="/" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+        <div className="px-3 py-4 border-t border-surface-border">
+          <Link to="/" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-ink-soft hover:bg-white/5 hover:text-ink transition-colors">
             <HiOutlineHome size={18} />
-            Ir a la tienda
+            Ir al sitio
           </Link>
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto bg-[#F5F3EE] p-6">
+      <main className="flex-1 overflow-auto bg-pearl p-6">
         {children}
       </main>
     </div>

@@ -20,9 +20,9 @@ const { executeRAG } = require('./ragService');
 // ─── Static direct responses ──────────────────────────────────────────────────
 const DIRECT_RESPONSES = {
   greeting: [
-    '¡Hola! 👋 Soy tu asistente de compras. ¿Qué estás buscando hoy?',
-    '¡Bienvenido/a! Estoy aquí para ayudarte. ¿Buscas algún producto en particular?',
-    '¡Hola! ¿En qué puedo ayudarte? Puedo recomendarte productos, consultar precios y verificar disponibilidad.',
+    '¡Hola! Soy el asistente de MDFK Tattoo. ¿Buscás turno, un estilo o algún insumo?',
+    '¡Bienvenido/a a MDFK! Te ayudo con trabajos, turnos con seña e insumos del estudio.',
+    '¡Hola! Contame si querés tatuarte, un piercing o ver insumos.',
   ],
 };
 
@@ -116,10 +116,10 @@ async function decide(
       } else if (productNames.length === 1) {
         fallbackText = `¿Te interesa una ${productNames[0]}? O podés contarme qué buscás.`;
       } else {
-        fallbackText = 'Contame qué estás buscando y te ayudo a encontrarlo.';
+        fallbackText = 'Decime si buscás un turno, un estilo de tattoo o un insumo (piercing, aftercare, merch).';
       }
     } else {
-      fallbackText = 'Contame qué buscás y te muestro lo que tenemos disponible.';
+      fallbackText = 'Puedo ayudarte con turnos, portfolio o insumos. ¿Qué necesitás?';
     }
     
     return {

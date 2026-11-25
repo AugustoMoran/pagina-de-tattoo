@@ -5,9 +5,13 @@ import { selectCurrentUser, selectIsAdmin } from './features/auth/authSlice';
 import { useGetCartQuery } from './services/cartApi';
 import { setItems } from './features/cart/cartSlice';
 import Layout from './components/layout/Layout';
+import './services/studioApi';
+import './services/bannersApi';
 
-// Pages
 const Home = lazy(() => import('./pages/Home'));
+const Trabajos = lazy(() => import('./pages/Trabajos'));
+const Turnos = lazy(() => import('./pages/Turnos'));
+const TurnoConfirmacion = lazy(() => import('./pages/TurnoConfirmacion'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Login = lazy(() => import('./pages/Login'));
@@ -19,7 +23,6 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Favorites = lazy(() => import('./pages/Favorites'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
-// Admin pages
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const ProductsAdmin = lazy(() => import('./pages/admin/ProductsAdmin'));
 const CategoriesAdmin = lazy(() => import('./pages/admin/CategoriesAdmin'));
@@ -29,8 +32,12 @@ const CouponsAdmin = lazy(() => import('./pages/admin/CouponsAdmin'));
 const CloudinaryAdmin = lazy(() => import('./pages/admin/CloudinaryAdmin'));
 const BannersAdmin = lazy(() => import('./pages/admin/BannersAdmin'));
 const PopupAdmin = lazy(() => import('./pages/admin/PopupAdmin'));
+const ArtistsAdmin = lazy(() => import('./pages/admin/ArtistsAdmin'));
+const PortfolioAdmin = lazy(() => import('./pages/admin/PortfolioAdmin'));
+const AppointmentsAdmin = lazy(() => import('./pages/admin/AppointmentsAdmin'));
+const AgendaAdmin = lazy(() => import('./pages/admin/AgendaAdmin'));
+const SettingsAdmin = lazy(() => import('./pages/admin/SettingsAdmin'));
 
-// Guards
 const ProtectedRoute = ({ children }) => {
   const user = useSelector(selectCurrentUser);
   return user ? children : <Navigate to="/login" replace />;
@@ -47,8 +54,8 @@ const GuestRoute = ({ children }) => {
 };
 
 const Loading = () => (
-    <div className="flex items-center justify-center min-h-[40vh]">
-    <div className="w-8 h-8 border-2 border-pearl-dark border-t-primary-400 rounded-full animate-spin" />
+  <div className="flex items-center justify-center min-h-[40vh]">
+    <div className="w-8 h-8 border-2 border-surface-border border-t-primary-400 rounded-full animate-spin" />
   </div>
 );
 
@@ -66,25 +73,26 @@ const App = () => (
   <Suspense fallback={<Loading />}>
     <CartInitializer />
     <Routes>
-      {/* Public routes with layout */}
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/productos" element={<Products />} />
+        <Route path="/trabajos" element={<Trabajos />} />
+        <Route path="/turnos" element={<Turnos />} />
+        <Route path="/turnos/confirmacion" element={<TurnoConfirmacion />} />
+        <Route path="/insumos" element={<Products />} />
+        <Route path="/insumos/:id" element={<ProductDetail />} />
+        <Route path="/productos" element={<Navigate to="/insumos" replace />} />
         <Route path="/productos/:id" element={<ProductDetail />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/orden/confirmacion" element={<OrderConfirmation />} />
 
-        {/* Auth routes (guests only) */}
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/registro" element={<GuestRoute><Register /></GuestRoute>} />
 
-        {/* Protected user routes */}
         <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/mis-ordenes" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
         <Route path="/favoritos" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
       </Route>
 
-      {/* Admin routes (no Layout wrapper — AdminLayout is self-contained) */}
       <Route path="/admin" element={<AdminRoute><Dashboard /></AdminRoute>} />
       <Route path="/admin/productos" element={<AdminRoute><ProductsAdmin /></AdminRoute>} />
       <Route path="/admin/categorias" element={<AdminRoute><CategoriesAdmin /></AdminRoute>} />
@@ -94,8 +102,12 @@ const App = () => (
       <Route path="/admin/cloudinary" element={<AdminRoute><CloudinaryAdmin /></AdminRoute>} />
       <Route path="/admin/banners" element={<AdminRoute><BannersAdmin /></AdminRoute>} />
       <Route path="/admin/popup" element={<AdminRoute><PopupAdmin /></AdminRoute>} />
+      <Route path="/admin/artistas" element={<AdminRoute><ArtistsAdmin /></AdminRoute>} />
+      <Route path="/admin/portfolio" element={<AdminRoute><PortfolioAdmin /></AdminRoute>} />
+      <Route path="/admin/turnos" element={<AdminRoute><AppointmentsAdmin /></AdminRoute>} />
+      <Route path="/admin/agenda" element={<AdminRoute><AgendaAdmin /></AdminRoute>} />
+      <Route path="/admin/configuracion" element={<AdminRoute><SettingsAdmin /></AdminRoute>} />
 
-      {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   </Suspense>

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useGetProductsQuery, useGetCategoriesQuery } from '../services/productsApi';
 import ProductCard from '../components/products/ProductCard';
+import HeroCarousel from '../components/ui/HeroCarousel';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
 import { HiAdjustments, HiX } from 'react-icons/hi';
 import SEO from '../components/common/SEO';
@@ -82,7 +83,7 @@ const Products = () => {
   const currentCategory = categories.find(c => c._id === categoria);
   const pageTitle = search 
     ? `Búsqueda: ${search}` 
-    : (currentCategory ? currentCategory.nombre : 'Todos los productos');
+    : (currentCategory ? currentCategory.nombre : 'Todos los insumos');
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -91,14 +92,14 @@ const Products = () => {
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "M Sports",
-        "item": "https://msportssl.com/"
+        "name": "MDFK Tattoo",
+        "item": "http://localhost:5173/"
       },
       {
         "@type": "ListItem",
         "position": 2,
-        "name": "Productos",
-        "item": "https://msportssl.com/productos"
+        "name": "Insumos",
+        "item": "http://localhost:5173/insumos"
       }
     ]
   };
@@ -108,7 +109,7 @@ const Products = () => {
       "@type": "ListItem",
       "position": 3,
       "name": currentCategory.nombre,
-      "item": `https://msportssl.com/productos?categoria=${currentCategory._id}`
+      "item": `http://localhost:5173/insumos?categoria=${currentCategory._id}`
     });
   }
 
@@ -126,20 +127,22 @@ const Products = () => {
   };
 
   return (
-    <div className="page-wrap py-10">
+    <div>
+      <HeroCarousel onlyApi />
+      <div className="page-wrap py-10">
       <SEO 
-        title={pageTitle}
-        description={`Explora nuestra colección de ${pageTitle.toLowerCase()} en M Sports. Calidad y rendimiento en cada artículo.`}
+        title={`${pageTitle} | MDFK Tattoo`}
+        description={`Insumos y productos del estudio MDFK Tattoo: ${pageTitle.toLowerCase()}.`}
         schemaData={breadcrumbSchema}
       />
       <div className="flex items-center justify-between mb-8">
         <div>
-          <p className="section-kicker mb-1">Catálogo</p>
+          <p className="section-kicker mb-1">Tienda</p>
           <h1 className="section-title">
             {search ? `Resultados para “${search}”` : pageTitle}
           </h1>
           {data && (
-            <p className="text-sm text-gray-500 mt-1.5">{data.total} productos encontrados</p>
+            <p className="text-sm text-ink-soft mt-1.5">{data.total} insumos</p>
           )}
         </div>
         <button
@@ -239,6 +242,7 @@ const Products = () => {
             </>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

@@ -1,138 +1,85 @@
 /**
- * core/prompts.js — Centralised prompt templates
- *
- * DESIGN DECISION: All AI instructions live here, not scattered across the codebase.
- * This makes it trivial to tune tone, language, and safety rules without touching logic.
- *
- * Rules enforced in every prompt:
- *  - Ecommerce-only scope
- *  - No hallucination (only use provided context)
- *  - Short, direct answers
- *  - Respond in the user's language
+ * core/prompts.js — MDFK Tattoo assistant prompts
  */
 
-// ─── System persona ───────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `Eres un asistente de ventas amable, experto y conversacional para una tienda online.
+const SYSTEM_PROMPT = `Sos el asistente oficial de MDFK Tattoo (estudio de tatuajes + tienda de insumos + turnos).
+
+CONTEXTO DEL SITIO:
+• Portfolio / trabajos: el usuario puede ver piezas en /trabajos
+• Insumos: tienda de piercing, aftercare, material de estudio y merch en /insumos
+• Turnos: se reservan en /turnos con seña (Mercado Pago o WhatsApp); el admin confirma
+• Instagram: @mdfk.tattoo · WhatsApp del estudio para coordinar
+• No inventes precios, stocks, artistas ni horarios que no estén en el contexto
 
 OBJETIVO:
-• Ayudar al cliente a encontrar exactamente lo que busca
-• Recomendar productos REALES del inventario, nunca inventar ni repetir lo que el usuario ya dijo
-• Personalizar cada respuesta según el contexto (regalo, clima, ocasión, presupuesto, etc)
+• Orientar sobre el estudio, portfolio, insumos y cómo pedir turno
+• Recomendar SOLO productos reales del inventario que te paso
+• Si preguntan por turnos: explicar que eligen artista + horario, pagan seña y quedan pendientes de confirmación
+• Si preguntan por estilos/trabajos: invitar a mirar /trabajos o Instagram, sin inventar piezas
 
+REGLAS ESTRICTAS:
+1. SOLO mencioná productos que estén en el inventario inyectado
+2. Si no hay match de producto, decilo y ofrecé otra categoría o turno/portfolio
+3. Máximo 3 oraciones cortas, español rioplatense, tono estudio profesional (directo, sin relleno)
+4. NUNCA inventes stock, medidas, colores o promociones
+5. NUNCA digas que sos de otra marca o tienda deportiva
+6. Si piden "tatuarme" / "turno": guiá a /turnos y mencioná la seña
+7. Si piden piercing/insumos: recomendá del catálogo con nombre y precio
+8. Evitá preguntas abiertas genéricas ("¿qué buscás?"); preferí una sugerencia concreta + una opción clara
 
-REGLAS ESTRICTAS (NO negociables):
-1. ✅ SOLO menciona productos que existen en el inventario (usa solo los que te paso)
-2. ✅ Si un producto está sin stock, sugiere alternativas disponibles
-3. ✅ Personaliza respuestas según contexto (regalo, clima, ocasión, presupuesto, etc)
-4. ✅ Responde en máximo 2 oraciones cortas, naturales y útiles
-5. ✅ Sé conversacional, cálido y profesional, como un amigo que sabe de moda
-6. ✅ NUNCA repitas el nombre del producto como loro ni respondas solo con el nombre (ej: si el usuario dice "remera", no respondas solo "remera")
-7. ✅ NUNCA hagas preguntas abiertas ni genéricas (no digas "¿Qué buscas?" ni "¿Te interesa algo más?")
-8. ✅ Si el usuario menciona "regalo", SIEMPRE responde con la frase "Para regalo, te puedo sugerir..." y sugiere productos ideales para regalar, sin repetir la palabra "regalo" ni el nombre del producto.
-9. ✅ Si el usuario pide un producto específico, sugiere variantes, colores, ofertas o productos relacionados
-10. ✅ NUNCA respondas con frases vacías, genéricas o robóticas
-
-TONO:
-• Natural, cálido, profesional y directo
-• Conversacional, como WhatsApp, pero sin perder el profesionalismo
-• Siempre en español de Argentina
-
-EJEMPLOS DE RESPUESTA CORRECTA:
-✅ "Si es para un regalo, una campera o unas zapatillas siempre quedan bien."
-✅ "Para el frío, tenemos buzos y camperas muy abrigadas."
-✅ "Las remeras estampadas están en oferta, ¿te gustaría ver alguna?"
-✅ "Si buscás algo especial, las zapatillas urbanas están muy de moda."
-
-EJEMPLOS DE RESPUESTA INCORRECTA (PROHIBIDO):
-❌ "remera"
-❌ "¿Qué estás buscando?"
-❌ "Te puedo ofrecer remera, remera, remera."
-❌ "No sé, decime vos."
-❌ "¿Te interesa algo más?"
-❌ "Tenemos productos disponibles."
+TONO: profesional, calmado, de estudio de tattoo. Sin emojis excesivos. Sin jerga médica inventada.
 `;
 
-// ─── RAG prompt ───────────────────────────────────────────────────────────────
-/**
- * Builds the prompt for a RAG (Retrieval-Augmented Generation) response.
- * Products from the database are injected as context so the AI cannot invent data.
- *
- * @param {string}   userMessage
- * @param {Object[]} products          - Normalised product objects
- * @param {Object[]} conversationHistory - Last N messages [{ role, content }]
- */
-function buildRAGPrompt(userMessage, products = [], conversationHistory = []) {
-  // Format products for natural mention (not numbered lists)
-  const formatProductForMention = (p) => {
-    const baseInfo = `${p.name}`;
-    const priceInfo = p.salePrice ? `$${p.salePrice} (estaba $${p.price})` : `$${p.price}`;
-    const stockInfo = p.stock > 0 ? `(${p.stock} disponibles)` : '(agotado)';
-    return `${baseInfo}: ${priceInfo} ${stockInfo}`;
-  };
+function formatProductForMention(p) {
+  const priceInfo = p.salePrice ? `$${p.salePrice} (estaba $${p.price})` : `$${p.price}`;
+  const stockInfo = p.stock > 0 ? `(${p.stock} disp.)` : '(agotado)';
+  const cat = p.category ? ` [${p.category}]` : '';
+  return `${p.name}${cat}: ${priceInfo} ${stockInfo}`;
+}
 
+function buildRAGPrompt(userMessage, products = [], conversationHistory = []) {
   const productContext =
     products.length > 0
-      ? `PRODUCTOS DISPONIBLES PARA SUGERIR:\n${products
-          .map(formatProductForMention)
-          .join('\n')}`
-      : 'No hay productos que coincidan.';
+      ? `INVENTARIO RELEVANTE:\n${products.map(formatProductForMention).join('\n')}`
+      : 'No hay productos que coincidan con la consulta.';
+
+  const history =
+    conversationHistory?.length > 0
+      ? `\nHISTORIAL RECIENTE:\n${conversationHistory
+          .slice(-4)
+          .map((m) => `${m.role}: ${m.content}`)
+          .join('\n')}\n`
+      : '';
 
   return (
     SYSTEM_PROMPT +
+    '\n' +
     productContext +
-    `\n\n─────────────────────────────────────\n` +
+    history +
+    `\n─────────────────────────────────────\n` +
     `CLIENTE: "${userMessage}"\n\n` +
-    `INSTRUCCIONES CRÍTICAS:\n` +
-    `• SOLO responde usando los productos listados arriba\n` +
-    `• Máximo 2 oraciones, suena natural y útil\n` +
-    `• Sugiere productos mencionándolos naturalmente (sin listas ni repeticiones)\n` +
-    `• Personaliza según el contexto del cliente\n` +
-    `• NUNCA repitas el nombre del producto como loro\n` +
-    `• NUNCA hagas preguntas abiertas ni genéricas\n\n` +
+    `Respondé útil y concreto. Si corresponde, mencioná /turnos, /trabajos o /insumos.\n` +
     `RESPUESTA:`
   );
 }
 
-// ─── Intent classification prompt ────────────────────────────────────────────
-/**
- * Used only in "smart" mode when keyword detection returns 'fallback'.
- * Expects the AI to return ONLY the intent name.
- */
 function buildIntentClassificationPrompt(message) {
   return (
-    `Clasifica el siguiente mensaje de un cliente de ecommerce en exactamente uno de estos intents:\n` +
-    `greeting, product_search, product_recommendation, price_query, stock_check, order_status, fallback\n\n` +
+    `Clasificá el mensaje de un cliente de MDFK Tattoo (tatuajes + insumos + turnos) en UNO de estos intents:\n` +
+    `greeting, product_search, product_recommendation, price_query, stock_check, appointment, portfolio, order_status, fallback\n\n` +
     `Mensaje: "${message}"\n\n` +
-    `Responde ÚNICAMENTE con el nombre del intent (una sola palabra), sin explicación ni puntuación.`
+    `Responde ÚNICAMENTE con el nombre del intent.`
   );
 }
 
-// ─── Recommendation prompt ────────────────────────────────────────────────────
-/**
- * Used when the engine has products to recommend and wants to generate
- * a natural-language introduction for them.
- */
 function buildRecommendationPrompt(userMessage, products = []) {
-  // Format products for natural conversation (no numbering)
-  const productList = products
-    .map((p) => {
-      const price = p.salePrice ? `$${p.salePrice} (antes $${p.price})` : `$${p.price}`;
-      return `• ${p.name}: ${price}${p.stock > 0 ? '' : ' (sin stock)'}`;
-    })
-    .join('\n');
+  const productList = products.map(formatProductForMention).join('\n');
 
   return (
     SYSTEM_PROMPT +
-    `PRODUCTOS DISPONIBLES PARA RECOMENDAR:\n${productList}\n\n` +
-    `─────────────────────────────────────\n` +
-    `CLIENTE DICE: "${userMessage}"\n\n` +
-    `INSTRUCCIONES CRÍTICAS:\n` +
-    `• SOLO responde usando los productos listados arriba\n` +
-    `• Máximo 2 oraciones, suena natural y útil\n` +
-    `• Sugiere productos mencionándolos naturalmente (sin listas ni repeticiones)\n` +
-    `• Personaliza según el contexto del cliente\n` +
-    `• NUNCA repitas el nombre del producto como loro\n` +
-    `• NUNCA hagas preguntas abiertas ni genéricas\n\n` +
+    `PRODUCTOS PARA RECOMENDAR:\n${productList}\n\n` +
+    `CLIENTE: "${userMessage}"\n\n` +
+    `Máximo 3 oraciones. Solo productos listados. Español Argentina.\n` +
     `RESPUESTA:`
   );
 }

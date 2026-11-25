@@ -13,8 +13,8 @@
     @apply box-border;
   }
   ::selection {
-    background: #FACC15;
-    color: #0F0F0F;
+    background: #C45C26;
+    color: #F2EDE6;
   }
   h1, h2, h3, h4 {
     @apply font-display tracking-tight;
@@ -26,80 +26,80 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Primary CTA — ink + white (máximo contraste sobre fondo amarillo) */
   .btn-primary {
-    @apply bg-ink hover:bg-black text-white font-semibold px-6 py-2.5 rounded-full transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
+    @apply bg-primary-400 hover:bg-primary-500 text-white font-semibold px-6 py-2.5 rounded-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  /* Secondary — ink border, fills ink on hover */
   .btn-secondary {
-    @apply border border-ink text-ink hover:bg-ink hover:text-white font-semibold px-6 py-2.5 rounded-full transition-all duration-200 active:scale-[0.98];
+    @apply border border-surface-border text-ink hover:border-primary-400 hover:text-primary-400 font-semibold px-6 py-2.5 rounded-lg transition-all duration-200 active:scale-[0.98];
   }
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-full transition-all duration-200 active:scale-[0.98];
+    @apply bg-red-700 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 active:scale-[0.98];
   }
   .btn-accent {
-    @apply bg-primary-400 hover:bg-primary-300 text-ink font-bold px-6 py-2.5 rounded-full transition-all duration-200 active:scale-[0.98] shadow-sm;
+    @apply bg-primary-400 hover:bg-primary-300 text-white font-bold px-6 py-2.5 rounded-lg transition-all duration-200 active:scale-[0.98];
   }
   .input-field {
-    @apply w-full border border-pearl-dark rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all bg-white placeholder:text-gray-400;
+    @apply w-full border border-surface-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-400/60 focus:border-primary-400 transition-all bg-surface text-ink placeholder:text-ink-soft/50;
   }
   .card {
-    @apply bg-white rounded-2xl overflow-hidden border border-pearl-dark shadow-card;
+    @apply bg-surface rounded-xl overflow-hidden border border-surface-border;
   }
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium;
   }
   .section-kicker {
-    @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500;
+    @apply text-[11px] font-semibold uppercase tracking-[0.2em] text-primary-400;
   }
   .section-title {
     @apply font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight;
   }
   .icon-btn {
-    @apply p-2 rounded-full text-ink hover:bg-black/5 transition-colors;
+    @apply p-2 rounded-lg text-ink hover:bg-white/5 transition-colors;
   }
 }
 
-/* Swiper — yellow bullets & arrows */
 .swiper-pagination-bullet {
-  background: #0F0F0F !important;
+  background: #F2EDE6 !important;
   opacity: 0.25 !important;
 }
 .swiper-pagination-bullet-active {
-  background: #FACC15 !important;
+  background: #C45C26 !important;
   opacity: 1 !important;
 }
 .swiper-button-next,
 .swiper-button-prev {
-  color: #FACC15 !important;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
-}
-.swiper-button-next::after,
-.swiper-button-prev::after {
-  font-size: 22px !important;
-  font-weight: 800;
+  color: #C45C26 !important;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #EAE8E2;
+  background: #111111;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1A1A1A;
+  background: #2A2A2A;
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #000000;
+  background: #C45C26;
 }
 
-/* Line clamp utilities */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+@keyframes portfolio-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.06); }
+}
+.portfolio-hover:hover img {
+  transform: scale(1.06);
+}
+.portfolio-hover img {
+  transition: transform 0.6s ease;
 }

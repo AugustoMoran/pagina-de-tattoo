@@ -91,4 +91,40 @@ const createPreference = async (order) => {
   }
 };
 
-module.exports = { createPreference };
+const createSeniaPreference = async (appointment) => {
+  try {
+    const client = getClient();
+    const preference = new Preference(client);
+    const isLocalhost = process.env.FRONTEND_URL?.includes('localhost');
+
+    const body = {
+      items: [
+        {
+          id: appointment._id.toString(),
+          title: `Seña turno ${appointment.codigo} — MDFK Tattoo`,
+          quantity: 1,
+          unit_price: Number(appointment.montoSenia),
+          currency_id: 'ARS',
+        },
+      ],
+      external_reference: `appointment:${appointment._id.toString()}`,
+      back_urls: {
+        success: `${process.env.FRONTEND_URL}/turnos/confirmacion?status=success&id=${appointment._id}`,
+        failure: `${process.env.FRONTEND_URL}/turnos/confirmacion?status=failure&id=${appointment._id}`,
+        pending: `${process.env.FRONTEND_URL}/turnos/confirmacion?status=pending&id=${appointment._id}`,
+      },
+    };
+
+    if (!isLocalhost) body.auto_return = 'approved';
+    if (process.env.BACKEND_URL) {
+      body.notification_url = `${process.env.BACKEND_URL}/api/webhook/mercadopago`;
+    }
+
+    return await preference.create({ body });
+  } catch (error) {
+    console.error('ERROR creating seña preference:', error.message);
+    throw error;
+  }
+};
+
+module.exports = { createPreference, createSeniaPreference };

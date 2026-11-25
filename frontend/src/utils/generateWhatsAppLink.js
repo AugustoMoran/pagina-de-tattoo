@@ -12,7 +12,7 @@ export const generateWhatsAppLink = (items, total, phone) => {
     .join('\n');
 
   const message = encodeURIComponent(
-    `🛒 *Nuevo pedido desde la tienda*\n\n${itemsList}\n\n*Total: $${total.toFixed(2)}*\n\n¡Quiero finalizar mi compra!`
+    `🛍️ *Pedido MDFK Tattoo — Insumos*\n\n${itemsList}\n\n*Total: $${Number(total).toLocaleString('es-AR')}*\n\nQuiero coordinar este pedido.`
   );
 
   return `https://wa.me/${number}?text=${message}`;

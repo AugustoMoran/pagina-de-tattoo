@@ -4,33 +4,24 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon-logo.png" sizes="192x192" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#FACC15" />
-    <title>M Sports | Tienda Online de Artículos Deportivos</title>
+    <meta name="theme-color" content="#0A0A0A" />
+    <title>MDFK Tattoo | Estudio · Portfolio · Insumos · Turnos</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://sdk.mercadopago.com" />
-    <link rel="preconnect" href="https://m-sports-backend.fly.dev" />
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>
-    <!-- Mercado Pago SDK - Loaded early to prevent race conditions -->
     <script>
-      // Load MP SDK with proper error handling
       window.mpScriptReady = new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = 'https://sdk.mercadopago.com/js/v2';
         script.async = true;
-        script.onload = () => {
-          console.log('✅ Mercado Pago SDK loaded from CDN');
-          resolve();
-        };
-        script.onerror = () => {
-          console.warn('⚠️ Failed to load Mercado Pago SDK from CDN');
-          reject(new Error('MP SDK failed to load'));
-        };
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('MP SDK failed to load'));
         document.head.appendChild(script);
       });
     </script>

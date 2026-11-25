@@ -32,17 +32,16 @@ const EMPTY = {
   video: '',
   videoPublicId: '',
   mostrarTexto: true,
-  ctaTexto: 'Ver productos',
-  ctaLink: '/productos',
+  ctaTexto: 'Ver insumos',
+  ctaLink: '/insumos',
   mostrarBoton: true,
   autoplay: false,
-  gradient: 'from-blue-900/70 to-transparent',
+  gradient: 'from-orange-900/70 to-transparent',
   activo: true,
   orden: 0,
 };
 
 const BannersAdmin = () => {
-  // Force rebuild v3
   const { data: banners = [], isLoading } = useGetBannersQuery(false);
   const [createBanner] = useCreateBannerMutation();
   const [updateBanner] = useUpdateBannerMutation();
@@ -160,7 +159,12 @@ const BannersAdmin = () => {
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Banners / Carrusel</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Banners / Carrusel</h1>
+          <p className="text-sm text-ink-soft mt-1">
+            Se muestran en <span className="text-primary-400">/insumos</span> (solo banners activos).
+          </p>
+        </div>
         <button
           onClick={() => { setShowForm(true); setEditing(null); setForm(EMPTY); setNewVideoPreview(''); setNewVideoFile(null); }}
           className="btn-primary flex items-center gap-2"

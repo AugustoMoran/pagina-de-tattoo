@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useGetProductQuery, useGetRelatedProductsQuery } from '../services/productsApi';
 import { useToggleFavoriteMutation, useGetMeQuery } from '../services/authApi';
@@ -26,140 +26,115 @@ const ProductDetail = () => {
   const [selectedTalla, setSelectedTalla] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
 
-  // Scroll to top when component mounts or when product changes
   useEffect(() => {
     window.scrollTo(0, 0);
+    setSelectedImage(0);
+    setSelectedColor(null);
+    setSelectedTalla(null);
   }, [id]);
+
+  const media = useMemo(() => {
+    if (!product) return [];
+    const list = [];
+    if (product.imagenes?.length) {
+      product.imagenes.forEach((img) => list.push({ type: 'image', ...img }));
+    }
+    if (product.videos?.length) {
+      product.videos.forEach((vid) => list.push({ type: 'video', ...vid }));
+    }
+    if (list.length === 0) {
+      list.push({ type: 'image', url: 'https://via.placeholder.com/600x600?text=Sin+imagen' });
+    }
+    return list;
+  }, [product]);
+
+  const colorImageUrl = useMemo(() => {
+    if (!product || !selectedColor) return null;
+    const color = product.colores?.find((c) => c.nombre === selectedColor);
+    return color?.imagen?.url || null;
+  }, [product, selectedColor]);
+
+  const mainDisplay = colorImageUrl
+    ? { type: 'image', url: colorImageUrl }
+    : media[selectedImage];
+
+  const selectColor = (nombre) => {
+    setSelectedColor(nombre);
+    const color = product.colores?.find((c) => c.nombre === nombre);
+    if (color?.imagen?.url) {
+      // Prefer color-linked image as main view
+      setSelectedImage(0);
+    }
+  };
 
   const handleBuyWithMP = () => {
     const needsTalla = product.tallas?.habilitadas?.length > 0;
     const needsColor = product.colores?.length > 0;
-    
     if ((needsTalla && !selectedTalla) || (needsColor && !selectedColor)) {
-      alert('Por favor selecciona talla y color');
+      alert('Por favor seleccioná talla y color si aplica');
       return;
     }
     addToCart(product, qty, selectedTalla, selectedColor);
     navigate('/checkout');
   };
 
-  if (isLoading) return (
-    <div className="page-wrap py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 animate-pulse">
-        <div className="aspect-square bg-pearl rounded-2xl" />
-        <div className="space-y-4">
-          <div className="h-8 bg-pearl rounded w-3/4" />
-          <div className="h-6 bg-pearl rounded w-1/4" />
-          <div className="h-20 bg-pearl rounded" />
+  if (isLoading) {
+    return (
+      <div className="page-wrap py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 animate-pulse">
+          <div className="aspect-square bg-surface rounded-xl" />
+          <div className="space-y-4">
+            <div className="h-8 bg-surface rounded w-3/4" />
+            <div className="h-6 bg-surface rounded w-1/4" />
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (error || !product) return (
-    <div className="page-wrap py-16 text-center text-gray-500">
-      <p className="font-display text-xl text-ink mb-4">Producto no encontrado.</p>
-      <Link to="/productos" className="btn-primary mt-4 inline-block">Ver productos</Link>
-    </div>
-  );
+  if (error || !product) {
+    return (
+      <div className="page-wrap py-16 text-center text-ink-soft">
+        <p className="font-display text-xl text-ink mb-4">Producto no encontrado.</p>
+        <Link to="/insumos" className="btn-primary mt-4 inline-block">Ver insumos</Link>
+      </div>
+    );
+  }
 
   const isFavorite = me?.favoritos?.includes(product._id);
   const displayPrice = product.precioOferta || product.precio;
   const hasDiscount = product.precioOferta && product.precioOferta < product.precio;
-  
-  // Combinar imágenes y videos en un carrusel
-  const media = [];
-  if (product.imagenes?.length) {
-    product.imagenes.forEach(img => media.push({ type: 'image', ...img }));
-  }
-  if (product.videos?.length) {
-    product.videos.forEach(vid => media.push({ type: 'video', ...vid }));
-  }
-  if (media.length === 0) {
-    media.push({ type: 'image', url: 'https://via.placeholder.com/600x600?text=Sin+imagen' });
-  }
 
   const waLink = generateWhatsAppLink(
     [{ producto: product, cantidad: qty, talla: selectedTalla, color: selectedColor }],
     displayPrice * qty
   );
 
-  const productSchema = {
-    "@context": "https://schema.org/",
-    "@type": "Product",
-    "name": product.nombre,
-    "image": product.imagenes?.map(img => img.url) || [],
-    "description": product.descripcion,
-    "sku": product.sku || product._id,
-    "brand": {
-      "@type": "Brand",
-      "name": product.marca || "M Sports"
-    },
-    "offers": {
-      "@type": "Offer",
-      "url": window.location.href,
-      "priceCurrency": "ARS",
-      "price": displayPrice,
-      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-    }
-  };
-
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "M Sports",
-        "item": "https://msportssl.com/"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Productos",
-        "item": "https://msportssl.com/productos"
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": product.categoria?.nombre || "Categoría",
-        "item": `https://msportssl.com/productos?categoria=${product.categoria?._id || ''}`
-      },
-      {
-        "@type": "ListItem",
-        "position": 4,
-        "name": product.nombre,
-        "item": window.location.href
-      }
-    ]
-  };
-
   return (
     <div className="page-wrap py-8">
-      <SEO 
-        title={product.nombre}
+      <SEO
+        title={`${product.nombre} | MDFK Tattoo`}
         description={product.descripcion?.substring(0, 160)}
         image={product.imagenes?.[0]?.url}
         type="product"
-        schemaData={[productSchema, breadcrumbSchema]}
       />
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-        <Link to="/productos" className="flex items-center gap-1 hover:text-ink">
-          <HiChevronLeft size={16} /> Productos
+
+      <div className="flex items-center gap-2 text-sm text-ink-soft mb-8">
+        <Link to="/insumos" className="flex items-center gap-1 hover:text-ink">
+          <HiChevronLeft size={16} /> Insumos
         </Link>
-        <span className="text-pearl-dark">/</span>
-        <span className="text-gray-400">{product.categoria?.nombre}</span>
-        <span className="text-pearl-dark">/</span>
+        <span>/</span>
+        <span>{product.categoria?.nombre}</span>
+        <span>/</span>
         <span className="text-ink font-medium truncate max-w-[200px]">{product.nombre}</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-14 mb-16">
         <div>
-          <div className="rounded-2xl overflow-hidden bg-white border border-pearl-dark mb-3 relative group aspect-square">
-            {media[selectedImage]?.type === 'video' ? (
+          <div className="rounded-xl overflow-hidden bg-surface border border-surface-border mb-3 relative group aspect-square">
+            {mainDisplay?.type === 'video' ? (
               <video
-                src={media[selectedImage]?.url}
+                src={mainDisplay?.url}
                 controls
                 autoPlay
                 loop
@@ -169,43 +144,39 @@ const ProductDetail = () => {
               />
             ) : (
               <img
-                src={media[selectedImage]?.url}
+                src={mainDisplay?.url}
                 alt={product.nombre}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain transition-opacity duration-300"
+                key={mainDisplay?.url}
               />
             )}
 
-            {/* Botones de navegación */}
-            {media.length > 1 && (
+            {!colorImageUrl && media.length > 1 && (
               <>
                 <button
                   onClick={() => setSelectedImage((prev) => (prev === 0 ? media.length - 1 : prev - 1))}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 >
                   <HiChevronLeft size={24} />
                 </button>
                 <button
                   onClick={() => setSelectedImage((prev) => (prev === media.length - 1 ? 0 : prev + 1))}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 >
                   <HiChevronRight size={24} />
                 </button>
-
-                {/* Contador */}
-                <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  {selectedImage + 1} / {media.length}
-                </div>
               </>
             )}
           </div>
-          {media.length > 1 && (
+
+          {!colorImageUrl && media.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
               {media.map((item, i) => (
                 <button
                   key={i}
                   onClick={() => setSelectedImage(i)}
-                  className={`relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-colors ${
-                    selectedImage === i ? 'border-primary-400' : 'border-pearl-dark'
+                  className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-colors ${
+                    selectedImage === i ? 'border-primary-400' : 'border-surface-border'
                   }`}
                 >
                   {item.type === 'video' ? (
@@ -226,12 +197,12 @@ const ProductDetail = () => {
 
         <div className="flex flex-col md:sticky md:top-24 md:self-start">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <p className="text-xs uppercase tracking-wider text-gray-400">{product.categoria?.nombre}</p>
+            <p className="text-xs uppercase tracking-wider text-ink-soft">{product.categoria?.nombre}</p>
             <button
               onClick={() => toggleFavorite(product._id)}
-              className="p-2 rounded-full hover:bg-white border border-transparent hover:border-pearl-dark transition-colors flex-shrink-0"
+              className="p-2 rounded-lg hover:bg-white/5 transition-colors flex-shrink-0"
             >
-              {isFavorite ? <HiHeart size={22} className="text-red-500" /> : <HiOutlineHeart size={22} className="text-gray-400" />}
+              {isFavorite ? <HiHeart size={22} className="text-red-500" /> : <HiOutlineHeart size={22} className="text-ink-soft" />}
             </button>
           </div>
 
@@ -241,40 +212,38 @@ const ProductDetail = () => {
             <span className="font-display text-3xl font-extrabold text-ink">{formatCurrency(displayPrice)}</span>
             {hasDiscount && (
               <>
-                <span className="text-lg text-gray-400 line-through">{formatCurrency(product.precio)}</span>
-                <span className="badge bg-ink text-primary-400 font-bold">
+                <span className="text-lg text-ink-soft line-through">{formatCurrency(product.precio)}</span>
+                <span className="badge bg-primary-400/20 text-primary-400 font-bold">
                   -{Math.round(((product.precio - product.precioOferta) / product.precio) * 100)}%
                 </span>
               </>
             )}
           </div>
 
-          <p className="text-gray-600 leading-relaxed mb-6">{product.descripcion}</p>
+          <p className="text-ink-soft leading-relaxed mb-6">{product.descripcion}</p>
 
-          {/* Stock */}
           <div className="mb-6">
             {product.stock > 0 ? (
-              <span className="badge bg-green-100 text-green-700">✓ En stock ({product.stock} disponibles)</span>
+              <span className="badge bg-emerald-500/15 text-emerald-400">En stock ({product.stock})</span>
             ) : (
-              <span className="badge bg-red-100 text-red-600">Sin stock</span>
+              <span className="badge bg-red-500/15 text-red-400">Sin stock</span>
             )}
           </div>
 
-          {/* Tallas - Solo si el producto tiene tallas */}
           {product.tallas?.habilitadas?.length > 0 && (
             <div className="mb-6">
               <label className="block text-sm font-semibold text-ink mb-2">
-                Talla {product.tallas?.rango && `(${product.tallas.rango})`}
+                Talla / medida {product.tallas?.rango && `(${product.tallas.rango})`}
               </label>
               <div className="flex gap-2 flex-wrap">
-                {product.tallas?.habilitadas?.map((talla) => (
+                {product.tallas.habilitadas.map((talla) => (
                   <button
                     key={talla}
                     onClick={() => setSelectedTalla(talla)}
-                    className={`min-w-[3rem] px-4 py-2 border rounded-full font-medium transition-all ${
+                    className={`min-w-[3rem] px-4 py-2 border rounded-lg font-medium transition-all ${
                       selectedTalla === talla
-                        ? 'border-primary-400 bg-primary-400 text-ink'
-                        : 'border-pearl-dark bg-white text-gray-600 hover:border-ink'
+                        ? 'border-primary-400 bg-primary-400 text-white'
+                        : 'border-surface-border bg-surface text-ink-soft hover:border-ink/40'
                     }`}
                   >
                     {talla}
@@ -284,50 +253,38 @@ const ProductDetail = () => {
             </div>
           )}
 
-          {/* Colores - Solo si el producto tiene colores */}
           {product.colores?.length > 0 && (
             <div className="mb-6">
               <label className="block text-sm font-semibold text-ink mb-2">
-                Color {product.colores?.length > 0 && `(${product.colores.length})`}
+                Color{selectedColor ? `: ${selectedColor}` : ''}
               </label>
               <div className="flex gap-3 flex-wrap">
-                {product.colores?.map((color) => (
+                {product.colores.map((color) => (
                   <button
-                    key={color.codigo}
-                    onClick={() => setSelectedColor(color.nombre)}
+                    key={`${color.nombre}-${color.codigo}`}
+                    onClick={() => selectColor(color.nombre)}
                     disabled={!color.habilitado}
                     className={`relative w-11 h-11 rounded-full border-2 transition-all ${
                       selectedColor === color.nombre
-                        ? 'border-ink ring-2 ring-offset-2 ring-primary-400'
-                        : 'border-pearl-dark hover:border-ink'
-                    } ${!color.habilitado ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        ? 'border-primary-400 ring-2 ring-offset-2 ring-offset-pearl ring-primary-400'
+                        : 'border-surface-border hover:border-ink/50'
+                    } ${!color.habilitado ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                     style={{ backgroundColor: color.codigo }}
                     title={color.nombre}
-                  >
-                    {selectedColor === color.nombre && (
-                      <div className="absolute inset-0 flex items-center justify-center text-white font-bold">✓</div>
-                    )}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
           )}
 
-          {/* Quantity + Add to cart */}
           {product.stock > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-4">
-                <label className="text-sm font-semibold text-ink">Cantidad:</label>
-                <div className="flex items-center border border-pearl-dark bg-white rounded-full overflow-hidden">
-                  <button
-                    onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    className="px-3.5 py-2 hover:bg-pearl text-lg"
-                  >-</button>
+                <label className="text-sm font-semibold text-ink">Cantidad</label>
+                <div className="flex items-center border border-surface-border bg-surface rounded-lg overflow-hidden">
+                  <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="px-3.5 py-2 hover:bg-white/5 text-lg">-</button>
                   <span className="px-4 py-2 font-medium">{qty}</span>
-                  <button
-                    onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
-                    className="px-3.5 py-2 hover:bg-pearl text-lg"
-                  >+</button>
+                  <button onClick={() => setQty((q) => Math.min(product.stock, q + 1))} className="px-3.5 py-2 hover:bg-white/5 text-lg">+</button>
                 </div>
               </div>
 
@@ -335,9 +292,8 @@ const ProductDetail = () => {
                 onClick={() => {
                   const needsTalla = product.tallas?.habilitadas?.length > 0;
                   const needsColor = product.colores?.length > 0;
-                  
                   if ((needsTalla && !selectedTalla) || (needsColor && !selectedColor)) {
-                    alert('Por favor selecciona talla y color');
+                    alert('Por favor seleccioná talla y color si aplica');
                     return;
                   }
                   addToCart(product, qty, selectedTalla, selectedColor);
@@ -351,39 +307,24 @@ const ProductDetail = () => {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleBuyWithMP}
-                  className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-full transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-3 rounded-lg transition-all"
                   disabled={
                     (product.tallas?.habilitadas?.length > 0 && !selectedTalla) ||
                     (product.colores?.length > 0 && !selectedColor)
                   }
                 >
-                  <FaCreditCard size={20} />
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs opacity-90">Pagar con</span>
-                    <span className="text-sm">Mercado Pago</span>
-                  </div>
+                  <FaCreditCard size={18} />
+                  <span className="text-sm">Mercado Pago</span>
                 </button>
 
                 <a
-                  onClick={(e) => {
-                    const needsTalla = product.tallas?.habilitadas?.length > 0;
-                    const needsColor = product.colores?.length > 0;
-                    
-                    if ((needsTalla && !selectedTalla) || (needsColor && !selectedColor)) {
-                      e.preventDefault();
-                      alert('Por favor selecciona talla y color');
-                    }
-                  }}
-                  href={(product.tallas?.habilitadas?.length === 0 || selectedTalla) && (product.colores?.length === 0 || selectedColor) ? waLink : '#'}
+                  href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-full transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe57] text-white font-bold px-4 py-3 rounded-lg transition-all"
                 >
-                  <FaWhatsapp size={20} />
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs opacity-90">Consultar por</span>
-                    <span className="text-sm">WhatsApp</span>
-                  </div>
+                  <FaWhatsapp size={18} />
+                  <span className="text-sm">WhatsApp</span>
                 </a>
               </div>
             </div>
@@ -391,11 +332,10 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Related products */}
       {related.length > 0 && (
         <section className="pb-16">
           <p className="section-kicker mb-1">Seguí explorando</p>
-          <h2 className="section-title mb-6">Productos relacionados</h2>
+          <h2 className="section-title mb-6">Relacionados</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {related.map((p) => <ProductCard key={p._id} product={p} />)}
           </div>

@@ -15,7 +15,16 @@
 const https = require('https');
 
 const API_HOST = 'generativelanguage.googleapis.com';
-const DEFAULT_MODEL = 'gemini-2.0-flash-lite'; // Best free-tier cost/quality ratio
+// Prefer current free-tier models; try fallbacks if one is retired
+const MODEL_CANDIDATES = [
+  process.env.GEMINI_MODEL,
+  'gemini-flash-lite-latest',
+  'gemini-2.5-flash-lite',
+  'gemini-3.5-flash-lite',
+  'gemini-flash-latest',
+  'gemini-2.5-flash',
+  'gemini-3.5-flash',
+].filter(Boolean);
 
 /**
  * Generates a text response using the Gemini API.
@@ -32,7 +41,29 @@ async function generateResponse(prompt, context = {}, apiKey) {
     );
   }
 
-  const model = context.model || DEFAULT_MODEL;
+  const models = context.model
+    ? [context.model, ...MODEL_CANDIDATES.filter((m) => m !== context.model)]
+    : MODEL_CANDIDATES;
+
+  let lastError;
+  for (const model of models) {
+    try {
+      return await callGemini(model, prompt, apiKey);
+    } catch (err) {
+      lastError = err;
+      const msg = String(err.message || '');
+      // Retry on retired/missing model
+      if (/404|no longer available|not found|NOT_FOUND/i.test(msg)) {
+        console.warn(`[Gemini] model ${model} failed, trying next…`, msg.slice(0, 120));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastError || new Error('[Gemini] No working model');
+}
+
+function callGemini(model, prompt, apiKey) {
   const path = `/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const body = JSON.stringify({
@@ -43,12 +74,11 @@ async function generateResponse(prompt, context = {}, apiKey) {
       },
     ],
     generationConfig: {
-      temperature: 0.3,       // Low temperature = factual, consistent responses
-      maxOutputTokens: 300,   // Keep answers short to save tokens
+      temperature: 0.3,
+      maxOutputTokens: 300,
       topP: 0.8,
       topK: 40,
     },
-    // Balanced safety — avoid over-blocking product queries
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
       { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
@@ -83,7 +113,6 @@ async function generateResponse(prompt, context = {}, apiKey) {
 
             const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) {
-              // Model may have been blocked by safety filters
               const reason = parsed?.candidates?.[0]?.finishReason || 'unknown';
               reject(new Error(`[Gemini] Empty response. finishReason: ${reason}`));
               return;
