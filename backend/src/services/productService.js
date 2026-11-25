@@ -79,6 +79,21 @@ const sanitizeProductData = (data) => {
   if (!clean.categoria) delete clean.categoria;
   if (!clean.descripcion) clean.descripcion = '';
   if (!clean.precioOferta) clean.precioOferta = null;
+
+  const attrs = clean.atributos || {};
+  if (!attrs.usaTallas) {
+    clean.tallas = { habilitadas: [], rango: '' };
+  }
+  if (!attrs.usaColores) {
+    clean.colores = [];
+  }
+  if (!attrs.usaMedidas) {
+    clean.medidas = {
+      habilitadas: [],
+      unidad: clean.medidas?.unidad || 'mm',
+      etiqueta: clean.medidas?.etiqueta || 'Medida',
+    };
+  }
   return clean;
 };
 

@@ -34,9 +34,22 @@ const productSchema = new mongoose.Schema(
     videos: [mediaSchema],
     tags: [{ type: String, trim: true }],
 
+    // Which variant dimensions apply (remera → tallas, arito → medidas/colores, instrumento → ninguno o colores)
+    atributos: {
+      usaTallas: { type: Boolean, default: false },
+      usaColores: { type: Boolean, default: false },
+      usaMedidas: { type: Boolean, default: false },
+    },
+
     tallas: {
       habilitadas: [{ type: String, trim: true }],
       rango: { type: String, default: '' },
+    },
+    // Piercing / jewelry sizes (stored as numeric strings, unit separate)
+    medidas: {
+      habilitadas: [{ type: String, trim: true }],
+      unidad: { type: String, default: 'mm', trim: true },
+      etiqueta: { type: String, default: 'Medida', trim: true },
     },
     colores: [colorSchema],
 

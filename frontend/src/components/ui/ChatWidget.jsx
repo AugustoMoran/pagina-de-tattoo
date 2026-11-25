@@ -42,13 +42,13 @@ function ProductCard({ product, onAddToCart, onBuyNow }) {
           />
         ) : (
           <div className="w-12 h-12 rounded-md bg-pearl flex items-center justify-center flex-shrink-0">
-            <FiShoppingBag size={16} className="text-primary-600" />
+            <FiShoppingBag size={16} className="text-primary-400" />
           </div>
         )}
 
         <div className="min-w-0 flex-1">
           <p className="text-xs font-medium text-ink truncate">{name}</p>
-          <p className="text-xs font-bold text-primary-600">{price}</p>
+          <p className="text-xs font-bold text-primary-400">{price}</p>
         </div>
       </div>
 
@@ -83,7 +83,7 @@ function Message({ msg, onAddToCart, onBuyNow }) {
       {/* Avatar */}
       {!isUser && (
         <div className="w-7 h-7 rounded-full bg-primary-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <RiRobot2Line size={15} className="text-ink" />
+          <RiRobot2Line size={15} className="text-white" />
         </div>
       )}
 
@@ -137,13 +137,13 @@ function TypingIndicator() {
   return (
     <div className="flex gap-2">
       <div className="w-7 h-7 rounded-full bg-primary-400 flex items-center justify-center flex-shrink-0">
-        <RiRobot2Line size={15} className="text-ink" />
+        <RiRobot2Line size={15} className="text-white" />
       </div>
-      <div className="px-3 py-2.5 rounded-2xl rounded-tl-sm bg-white border border-pearl-dark shadow-sm">
+      <div className="px-3 py-2.5 rounded-2xl rounded-tl-sm bg-surface border border-surface-border shadow-sm">
         <div className="flex gap-1 items-center h-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-ink/30 animate-bounce [animation-delay:0ms]" />
-          <span className="w-1.5 h-1.5 rounded-full bg-ink/30 animate-bounce [animation-delay:150ms]" />
-          <span className="w-1.5 h-1.5 rounded-full bg-ink/30 animate-bounce [animation-delay:300ms]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-ink-soft animate-bounce [animation-delay:0ms]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-ink-soft animate-bounce [animation-delay:150ms]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-ink-soft animate-bounce [animation-delay:300ms]" />
         </div>
       </div>
     </div>

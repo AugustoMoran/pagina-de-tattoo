@@ -39,17 +39,17 @@ const CartDrawer = () => {
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 gap-4">
-              <div className="w-16 h-16 rounded-full bg-pearl flex items-center justify-center">
-                <HiOutlineShoppingBag size={28} className="text-gray-400" />
+            <div className="flex flex-col items-center justify-center h-full text-center text-ink-soft gap-4">
+              <div className="w-16 h-16 rounded-full bg-pearl border border-surface-border flex items-center justify-center">
+                <HiOutlineShoppingBag size={28} className="text-ink-soft" />
               </div>
               <p className="text-sm">Tu carrito está vacío</p>
               <Link
-                to="/productos"
+                to="/insumos"
                 onClick={() => dispatch(closeCart())}
                 className="btn-primary text-sm"
               >
-                Ver productos
+                Ver insumos
               </Link>
             </div>
           ) : (
@@ -68,7 +68,7 @@ const CartDrawer = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium line-clamp-2 mb-1">{nombre}</p>
-                      <div className="text-xs text-gray-500 mb-2 space-y-0.5">
+                      <div className="text-xs text-ink-soft mb-2 space-y-0.5">
                         <p>{formatCurrency(price)} c/u</p>
                         {item.talla && <p>Talla: <span className="font-medium text-ink">{item.talla}</span></p>}
                         {item.color && <p>Color: <span className="font-medium text-ink">{item.color}</span></p>}
@@ -76,14 +76,14 @@ const CartDrawer = () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => updateQuantity(id, item.cantidad - 1, item.talla, item.color)}
-                          className="w-7 h-7 rounded-full border border-pearl-dark flex items-center justify-center text-sm hover:bg-pearl"
+                          className="w-7 h-7 rounded-full border border-surface-border text-ink flex items-center justify-center text-sm hover:border-primary-400 hover:text-primary-400"
                         >
                           -
                         </button>
-                        <span className="text-sm font-medium w-5 text-center">{item.cantidad}</span>
+                        <span className="text-sm font-medium w-5 text-center text-ink">{item.cantidad}</span>
                         <button
                           onClick={() => updateQuantity(id, item.cantidad + 1, item.talla, item.color)}
-                          className="w-7 h-7 rounded-full border border-pearl-dark flex items-center justify-center text-sm hover:bg-pearl"
+                          className="w-7 h-7 rounded-full border border-surface-border text-ink flex items-center justify-center text-sm hover:border-primary-400 hover:text-primary-400"
                         >
                           +
                         </button>
@@ -92,7 +92,7 @@ const CartDrawer = () => {
                     <div className="flex flex-col items-end justify-between">
                       <button
                         onClick={() => removeFromCart(id, item.talla, item.color)}
-                        className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                        className="text-ink-soft hover:text-red-400 transition-colors p-1"
                       >
                         <HiOutlineTrash size={16} />
                       </button>

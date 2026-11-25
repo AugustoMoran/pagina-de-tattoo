@@ -24,6 +24,7 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [qty, setQty] = useState(1);
   const [selectedTalla, setSelectedTalla] = useState(null);
+  const [selectedMedida, setSelectedMedida] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ const ProductDetail = () => {
     setSelectedImage(0);
     setSelectedColor(null);
     setSelectedTalla(null);
+    setSelectedMedida(null);
   }, [id]);
 
   const media = useMemo(() => {
@@ -67,14 +69,45 @@ const ProductDetail = () => {
     }
   };
 
+  const attrs = product
+    ? {
+        usaTallas:
+          product.atributos?.usaTallas ?? (product.tallas?.habilitadas?.length > 0),
+        usaMedidas:
+          product.atributos?.usaMedidas ?? (product.medidas?.habilitadas?.length > 0),
+        usaColores:
+          product.atributos?.usaColores ?? (product.colores?.filter((c) => c.habilitado !== false).length > 0),
+      }
+    : { usaTallas: false, usaMedidas: false, usaColores: false };
+
+  const tallasActivas = attrs.usaTallas ? product?.tallas?.habilitadas || [] : [];
+  const medidasActivas = attrs.usaMedidas ? product?.medidas?.habilitadas || [] : [];
+  const coloresActivos = attrs.usaColores
+    ? (product?.colores || []).filter((c) => c.habilitado !== false)
+    : [];
+  const medidaUnidad = product?.medidas?.unidad || 'mm';
+  const medidaEtiqueta = product?.medidas?.etiqueta || 'Medida';
+
+  const buildVariantLabel = () => {
+    const parts = [];
+    if (selectedTalla) parts.push(selectedTalla);
+    if (selectedMedida) parts.push(`${selectedMedida}${medidaUnidad}`);
+    return parts.length ? parts.join(' / ') : null;
+  };
+
+  const variantsReady = () => {
+    if (tallasActivas.length && !selectedTalla) return false;
+    if (medidasActivas.length && !selectedMedida) return false;
+    if (coloresActivos.length && !selectedColor) return false;
+    return true;
+  };
+
   const handleBuyWithMP = () => {
-    const needsTalla = product.tallas?.habilitadas?.length > 0;
-    const needsColor = product.colores?.length > 0;
-    if ((needsTalla && !selectedTalla) || (needsColor && !selectedColor)) {
-      alert('Por favor seleccioná talla y color si aplica');
+    if (!variantsReady()) {
+      alert('Seleccioná las opciones del producto (talle, medida y/o color)');
       return;
     }
-    addToCart(product, qty, selectedTalla, selectedColor);
+    addToCart(product, qty, buildVariantLabel(), selectedColor);
     navigate('/checkout');
   };
 
@@ -106,7 +139,7 @@ const ProductDetail = () => {
   const hasDiscount = product.precioOferta && product.precioOferta < product.precio;
 
   const waLink = generateWhatsAppLink(
-    [{ producto: product, cantidad: qty, talla: selectedTalla, color: selectedColor }],
+    [{ producto: product, cantidad: qty, talla: buildVariantLabel(), color: selectedColor }],
     displayPrice * qty
   );
 
@@ -230,15 +263,16 @@ const ProductDetail = () => {
             )}
           </div>
 
-          {product.tallas?.habilitadas?.length > 0 && (
+          {tallasActivas.length > 0 && (
             <div className="mb-6">
               <label className="block text-sm font-semibold text-ink mb-2">
-                Talla / medida {product.tallas?.rango && `(${product.tallas.rango})`}
+                Talle {product.tallas?.rango && `(${product.tallas.rango})`}
               </label>
               <div className="flex gap-2 flex-wrap">
-                {product.tallas.habilitadas.map((talla) => (
+                {tallasActivas.map((talla) => (
                   <button
                     key={talla}
+                    type="button"
                     onClick={() => setSelectedTalla(talla)}
                     className={`min-w-[3rem] px-4 py-2 border rounded-lg font-medium transition-all ${
                       selectedTalla === talla
@@ -253,22 +287,45 @@ const ProductDetail = () => {
             </div>
           )}
 
-          {product.colores?.length > 0 && (
+          {medidasActivas.length > 0 && (
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-ink mb-2">{medidaEtiqueta}</label>
+              <div className="flex gap-2 flex-wrap">
+                {medidasActivas.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setSelectedMedida(m)}
+                    className={`min-w-[3rem] px-4 py-2 border rounded-lg font-medium transition-all ${
+                      selectedMedida === m
+                        ? 'border-primary-400 bg-primary-400 text-white'
+                        : 'border-surface-border bg-surface text-ink-soft hover:border-ink/40'
+                    }`}
+                  >
+                    {m}
+                    {medidaUnidad}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {coloresActivos.length > 0 && (
             <div className="mb-6">
               <label className="block text-sm font-semibold text-ink mb-2">
                 Color{selectedColor ? `: ${selectedColor}` : ''}
               </label>
               <div className="flex gap-3 flex-wrap">
-                {product.colores.map((color) => (
+                {coloresActivos.map((color) => (
                   <button
                     key={`${color.nombre}-${color.codigo}`}
+                    type="button"
                     onClick={() => selectColor(color.nombre)}
-                    disabled={!color.habilitado}
                     className={`relative w-11 h-11 rounded-full border-2 transition-all ${
                       selectedColor === color.nombre
                         ? 'border-primary-400 ring-2 ring-offset-2 ring-offset-pearl ring-primary-400'
                         : 'border-surface-border hover:border-ink/50'
-                    } ${!color.habilitado ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                    }`}
                     style={{ backgroundColor: color.codigo }}
                     title={color.nombre}
                   />
@@ -289,14 +346,13 @@ const ProductDetail = () => {
               </div>
 
               <button
+                type="button"
                 onClick={() => {
-                  const needsTalla = product.tallas?.habilitadas?.length > 0;
-                  const needsColor = product.colores?.length > 0;
-                  if ((needsTalla && !selectedTalla) || (needsColor && !selectedColor)) {
-                    alert('Por favor seleccioná talla y color si aplica');
+                  if (!variantsReady()) {
+                    alert('Seleccioná las opciones del producto (talle, medida y/o color)');
                     return;
                   }
-                  addToCart(product, qty, selectedTalla, selectedColor);
+                  addToCart(product, qty, buildVariantLabel(), selectedColor);
                 }}
                 className="btn-primary w-full flex items-center justify-center gap-2 py-3"
               >
@@ -306,12 +362,10 @@ const ProductDetail = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <button
+                  type="button"
                   onClick={handleBuyWithMP}
-                  className="flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-3 rounded-lg transition-all"
-                  disabled={
-                    (product.tallas?.habilitadas?.length > 0 && !selectedTalla) ||
-                    (product.colores?.length > 0 && !selectedColor)
-                  }
+                  className="flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-bold px-4 py-3 rounded-lg transition-all disabled:opacity-40"
+                  disabled={!variantsReady()}
                 >
                   <FaCreditCard size={18} />
                   <span className="text-sm">Mercado Pago</span>

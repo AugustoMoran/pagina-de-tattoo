@@ -74,7 +74,7 @@ const AgendaAdmin = () => {
     setDirty(false);
   }, [selected?._id, selected?.updatedAt]);
 
-  const bandsForDay = (day) => weekly.filter((w) => w.dayOfWeek === day);
+  const bandsForDay = (day) => weekly.filter((w) => Number(w.dayOfWeek) === day);
 
   const setDayEnabled = (day, enabled) => {
     setDirty(true);
@@ -83,23 +83,20 @@ const AgendaAdmin = () => {
         setWeekly((w) => [...w, emptyBand(day)]);
       }
     } else {
-      setWeekly((w) => w.filter((b) => b.dayOfWeek !== day));
+      setWeekly((w) => w.filter((b) => Number(b.dayOfWeek) !== day));
     }
   };
 
   const updateBand = (day, indexInDay, patch) => {
     setDirty(true);
-    const dayBands = bandsForDay(day);
-    const target = dayBands[indexInDay];
-    if (!target) return;
-    let seen = 0;
-    setWeekly((all) =>
-      all.map((b) => {
-        if (b.dayOfWeek !== day) return b;
+    setWeekly((all) => {
+      let seen = 0;
+      return all.map((b) => {
+        if (Number(b.dayOfWeek) !== day) return b;
         if (seen++ === indexInDay) return { ...b, ...patch };
         return b;
-      })
-    );
+      });
+    });
   };
 
   const addBand = (day) => {
@@ -109,15 +106,15 @@ const AgendaAdmin = () => {
 
   const removeBand = (day, indexInDay) => {
     setDirty(true);
-    let seen = 0;
-    setWeekly((all) =>
-      all.filter((b) => {
-        if (b.dayOfWeek !== day) return true;
+    setWeekly((all) => {
+      let seen = 0;
+      return all.filter((b) => {
+        if (Number(b.dayOfWeek) !== day) return true;
         const keep = seen !== indexInDay;
         seen += 1;
         return keep;
-      })
-    );
+      });
+    });
   };
 
   const save = async () => {
