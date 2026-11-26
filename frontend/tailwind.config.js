@@ -22,17 +22,17 @@ export default {
           600: '#8A3D19',
         },
         pearl: {
-          DEFAULT: '#111111', // page bg (dark)
-          dark:    '#1C1C1C', // elevated surfaces
+          DEFAULT: '#0E1412', // page bg — near-black with the logo's teal
+          dark:    '#171F1D',
         },
         ink: {
           DEFAULT: '#F2EDE6', // light text on dark
           soft:    '#C8C2B8',
         },
         surface: {
-          DEFAULT: '#161616',
-          raised:  '#1E1E1E',
-          border:  '#2A2A2A',
+          DEFAULT: '#141C1A',
+          raised:  '#1C2623',
+          border:  '#2C3936',
         },
       },
       fontFamily: {

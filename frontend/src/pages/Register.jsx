@@ -5,6 +5,7 @@ import { useRegisterMutation } from '../services/authApi';
 import { setCredentials } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
+import Logo from '../components/common/Logo';
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -32,6 +33,7 @@ const Register = () => {
       <div className="w-full max-w-md">
         <div className="card p-8 sm:p-10">
           <div className="text-center mb-8">
+            <Logo className="h-16 w-16 rounded-md mx-auto mb-4 shadow-[0_0_0_1px_rgba(186,214,206,0.16)]" />
             <p className="font-display text-3xl font-extrabold text-ink mb-3">
               MDFK<span className="text-primary-400">.</span>
             </p>

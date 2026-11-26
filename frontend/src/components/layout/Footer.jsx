@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaInstagram, FaWhatsapp } from 'react-icons/fa';
+import Logo from '../common/Logo';
 
 const Footer = () => {
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '5491137764237';
@@ -13,9 +14,12 @@ const Footer = () => {
       <div className="page-wrap py-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="lg:col-span-2">
-            <p className="font-display text-3xl font-extrabold text-ink tracking-tight mb-3">
-              MDFK<span className="text-primary-400">.</span>
-            </p>
+            <div className="flex items-center gap-3 mb-4">
+              <Logo className="h-16 w-16 rounded-md shadow-[0_0_0_1px_rgba(186,214,206,0.16),0_12px_30px_rgba(0,0,0,0.35)]" />
+              <p className="font-display text-3xl font-extrabold text-ink tracking-tight">
+                MDFK<span className="text-primary-400">.</span>
+              </p>
+            </div>
             <p className="text-sm leading-relaxed max-w-sm mb-6">
               Estudio de tatuajes. Portfolio, insumos profesionales y turnos con seña.
               Coordiná por WhatsApp o reservá online.

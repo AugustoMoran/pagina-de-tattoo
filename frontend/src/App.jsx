@@ -5,6 +5,7 @@ import { selectCurrentUser, selectIsAdmin } from './features/auth/authSlice';
 import { useGetCartQuery } from './services/cartApi';
 import { setItems } from './features/cart/cartSlice';
 import Layout from './components/layout/Layout';
+import IntroSplash from './components/common/IntroSplash';
 import './services/studioApi';
 import './services/bannersApi';
 
@@ -70,7 +71,9 @@ const CartInitializer = () => {
 };
 
 const App = () => (
-  <Suspense fallback={<Loading />}>
+  <>
+    <IntroSplash />
+    <Suspense fallback={<Loading />}>
     <CartInitializer />
     <Routes>
       <Route element={<Layout />}>
@@ -111,6 +114,7 @@ const App = () => (
       <Route path="*" element={<NotFound />} />
     </Routes>
   </Suspense>
+  </>
 );
 
 export default App;

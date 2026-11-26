@@ -4,6 +4,7 @@ import { useGetPortfolioQuery } from '../services/studioApi';
 import { useGetProductsQuery } from '../services/productsApi';
 import ProductCard from '../components/products/ProductCard';
 import SEO from '../components/common/SEO';
+import Logo from '../components/common/Logo';
 import { HiArrowRight } from 'react-icons/hi';
 
 const HERO_IMG =
@@ -48,6 +49,7 @@ const Home = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-pearl via-pearl/70 to-black/40" />
         <div className="relative page-wrap pb-16 pt-32 w-full animate-slide-up">
+          <Logo className="h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] rounded-md mb-5 shadow-[0_0_0_1px_rgba(186,214,206,0.16),0_16px_40px_rgba(0,0,0,0.45)]" />
           <p className="section-kicker mb-3">Estudio · Portfolio · Insumos</p>
           <h1 className="font-display text-5xl sm:text-7xl md:text-8xl font-extrabold text-ink tracking-tight leading-[0.95] mb-4">
             MDFK<span className="text-primary-400">.</span>

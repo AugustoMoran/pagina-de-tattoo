@@ -18,6 +18,7 @@ import {
   HiOutlineColorSwatch,
   HiOutlineCog,
 } from 'react-icons/hi';
+import Logo from '../common/Logo';
 
 const NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', icon: HiOutlineViewGrid, exact: true },
@@ -45,8 +46,13 @@ const AdminLayout = ({ children }) => {
     <div className="flex min-h-screen bg-pearl text-ink">
       <aside className="w-56 bg-surface border-r border-surface-border flex-shrink-0 hidden md:flex flex-col">
         <div className="px-5 py-5 border-b border-surface-border">
-          <p className="font-display font-bold text-ink">Panel Admin</p>
-          <p className="text-[11px] text-primary-400 mt-0.5 tracking-wide">MDFK Tattoo</p>
+          <div className="flex items-center gap-2.5">
+            <Logo className="h-9 w-9 rounded-[4px] shadow-[0_0_0_1px_rgba(186,214,206,0.16)]" />
+            <div>
+              <p className="font-display font-bold text-ink">Panel Admin</p>
+              <p className="text-[11px] text-primary-400 mt-0.5 tracking-wide">MDFK Tattoo</p>
+            </div>
+          </div>
         </div>
         <nav className="flex-1 py-4 space-y-0.5 px-3 overflow-y-auto">
           {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => {

@@ -22,7 +22,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             position="top-right"
             toastOptions={{
               duration: 3000,
-              style: { borderRadius: '12px', fontFamily: 'DM Sans, sans-serif', background: '#1E1E1E', color: '#F2EDE6', border: '1px solid #2A2A2A' },
+              style: { borderRadius: '12px', fontFamily: 'DM Sans, sans-serif', background: '#1C2623', color: '#F2EDE6', border: '1px solid #2C3936' },
             }}
           />
         </BrowserRouter>

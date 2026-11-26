@@ -5,48 +5,46 @@ const Category = require('../models/Category');
 
 router.get('/sitemap.xml', async (req, res) => {
   try {
-    const products = await Product.find({ activo: true }).select('_id updatedAt');
+    const products = await Product.find({ isActive: true, deletedAt: null }).select('_id updatedAt');
     const categories = await Category.find().select('_id');
-    
-    const baseUrl = 'https://msportssl.com'; // Cambiar por el dominio real en producción
+
+    const baseUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
-    // Home
-    xml += `
-      <url>
-        <loc>${baseUrl}/</loc>
-        <changefreq>daily</changefreq>
-        <priority>1.0</priority>
-      </url>`;
+    const staticPaths = [
+      { path: '/', priority: '1.0', changefreq: 'daily' },
+      { path: '/trabajos', priority: '0.9', changefreq: 'weekly' },
+      { path: '/insumos', priority: '0.9', changefreq: 'daily' },
+      { path: '/turnos', priority: '0.8', changefreq: 'weekly' },
+    ];
 
-    // Products main page
-    xml += `
+    for (const page of staticPaths) {
+      xml += `
       <url>
-        <loc>${baseUrl}/productos</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
+        <loc>${baseUrl}${page.path}</loc>
+        <changefreq>${page.changefreq}</changefreq>
+        <priority>${page.priority}</priority>
       </url>`;
+    }
 
-    // Dynamic Categories
-    categories.forEach(cat => {
+    categories.forEach((cat) => {
       xml += `
         <url>
-          <loc>${baseUrl}/productos?categoria=${cat._id}</loc>
+          <loc>${baseUrl}/insumos?categoria=${cat._id}</loc>
           <changefreq>weekly</changefreq>
-          <priority>0.8</priority>
+          <priority>0.7</priority>
         </url>`;
     });
 
-    // Dynamic Products
-    products.forEach(prod => {
+    products.forEach((prod) => {
       xml += `
         <url>
-          <loc>${baseUrl}/productos/${prod._id}</loc>
+          <loc>${baseUrl}/insumos/${prod._id}</loc>
           <lastmod>${prod.updatedAt.toISOString().split('T')[0]}</lastmod>
           <changefreq>weekly</changefreq>
-          <priority>0.7</priority>
+          <priority>0.6</priority>
         </url>`;
     });
 

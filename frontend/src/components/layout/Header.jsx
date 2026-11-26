@@ -14,6 +14,7 @@ import useAuth from '../../hooks/useAuth';
 import useCart from '../../hooks/useCart';
 import { toggleMenu, closeMenu } from '../../features/ui/uiSlice';
 import { useGetCategoriesQuery, useGetProductSuggestionsQuery } from '../../services/productsApi';
+import Logo from '../common/Logo';
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -128,7 +129,8 @@ const Header = () => {
               >
                 {menuOpen ? <HiX size={22} /> : <HiMenu size={22} />}
               </button>
-              <Link to="/" className="flex items-center gap-2" onClick={() => dispatch(closeMenu())}>
+              <Link to="/" className="flex items-center gap-2.5 min-w-0" onClick={() => dispatch(closeMenu())}>
+                <Logo className="h-9 w-9 md:h-11 md:w-11 shrink-0 rounded-[4px] shadow-[0_0_0_1px_rgba(186,214,206,0.16)]" />
                 <span className="font-display font-extrabold text-xl md:text-2xl tracking-tight text-ink">
                   MDFK<span className="text-primary-400">.</span>
                 </span>
@@ -273,7 +275,10 @@ const Header = () => {
           }`}
         >
           <div className="flex items-center justify-between px-5 py-4 border-b border-surface-border">
-            <span className="font-display font-bold text-lg text-ink">MDFK Tattoo</span>
+            <span className="flex items-center gap-2.5 font-display font-bold text-lg text-ink">
+              <Logo className="h-9 w-9 rounded-[4px] shadow-[0_0_0_1px_rgba(186,214,206,0.16)]" />
+              MDFK Tattoo
+            </span>
             <button onClick={() => dispatch(closeMenu())} className="icon-btn">
               <HiX size={22} />
             </button>
