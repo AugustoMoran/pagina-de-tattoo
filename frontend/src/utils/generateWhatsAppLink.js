@@ -17,3 +17,22 @@ export const generateWhatsAppLink = (items, total, phone) => {
 
   return `https://wa.me/${number}?text=${message}`;
 };
+
+export const generateOrderWhatsAppLink = (order, phone) => {
+  const number = phone || import.meta.env.VITE_WHATSAPP_NUMBER || '5491137764237';
+  const itemsList = (order.items || [])
+    .map((item) => {
+      let line = `• ${item.nombre} x${item.cantidad}`;
+      if (item.talla) line += ` — Talla: ${item.talla}`;
+      if (item.color) line += ` — Color: ${item.color}`;
+      return line;
+    })
+    .join('\n');
+
+  const total = Number(order.total || 0).toLocaleString('es-AR');
+  const message = encodeURIComponent(
+    `Hola, ya pagué por Mercado Pago.\n\n*Pedido ${order.codigo}*\n${itemsList}\n\n*Total: $${total}*\n\nQuiero coordinar la entrega.`
+  );
+
+  return `https://wa.me/${number}?text=${message}`;
+};

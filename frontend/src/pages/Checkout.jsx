@@ -26,7 +26,7 @@ const Checkout = () => {
   const [clearCartApi] = useClearCartMutation();
   const [validateCoupon] = useValidateCouponMutation();
 
-  const [guestData, setGuestData] = useState({ nombre: '', apellido: '', email: '', telefono: '', direccion: '' });
+  const [guestData, setGuestData] = useState({ nombre: '', apellido: '', email: '', telefono: '' });
   const [couponCode, setCouponCode] = useState('');
   const [couponResult, setCouponResult] = useState(null);
   const [payMethod, setPayMethod] = useState('mercadopago');
@@ -133,16 +133,6 @@ const Checkout = () => {
                     />
                   </div>
                 ))}
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1">Dirección de entrega</label>
-                  <input
-                    type="text"
-                    value={guestData.direccion}
-                    onChange={(e) => setGuestData({ ...guestData, direccion: e.target.value })}
-                    className="input-field"
-                    placeholder="Calle, número, ciudad..."
-                  />
-                </div>
               </div>
             </div>
           )}
@@ -169,22 +159,23 @@ const Checkout = () => {
 
           {/* Payment method */}
           <div className="card p-6">
-            <h2 className="font-display font-semibold text-lg mb-4">Método de pago</h2>
+            <h2 className="font-display font-semibold text-lg mb-1">Método de pago</h2>
+            <p className="text-xs text-ink-soft mb-4">Después de pagar con Mercado Pago te abrimos WhatsApp con la compra para coordinar la entrega.</p>
             <div className="space-y-3">
-              <label className={`flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${payMethod === 'mercadopago' ? 'border-primary-400 bg-primary-50' : 'border-pearl-dark hover:border-gray-300'}`}>
+              <label className={`flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${payMethod === 'mercadopago' ? 'border-primary-400 bg-primary-400/10' : 'border-surface-border hover:border-primary-400/40'}`}>
                 <input type="radio" value="mercadopago" checked={payMethod === 'mercadopago'} onChange={() => setPayMethod('mercadopago')} className="sr-only" />
-                <FaCreditCard size={20} className={payMethod === 'mercadopago' ? 'text-ink' : 'text-gray-400'} />
+                <FaCreditCard size={20} className={payMethod === 'mercadopago' ? 'text-primary-400' : 'text-ink-soft'} />
                 <div>
-                  <p className="font-medium text-sm">Mercado Pago</p>
-                  <p className="text-xs text-gray-500">Tarjeta, efectivo, transferencia</p>
+                  <p className="font-medium text-sm text-ink">Mercado Pago</p>
+                  <p className="text-xs text-ink-soft">Tarjeta, efectivo, transferencia</p>
                 </div>
               </label>
-              <label className={`flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${payMethod === 'whatsapp' ? 'border-green-500 bg-green-50' : 'border-pearl-dark hover:border-gray-300'}`}>
+              <label className={`flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${payMethod === 'whatsapp' ? 'border-[#25D366] bg-[#25D366]/10' : 'border-surface-border hover:border-[#25D366]/40'}`}>
                 <input type="radio" value="whatsapp" checked={payMethod === 'whatsapp'} onChange={() => setPayMethod('whatsapp')} className="sr-only" />
-                <FaWhatsapp size={20} className={payMethod === 'whatsapp' ? 'text-green-600' : 'text-gray-400'} />
+                <FaWhatsapp size={20} className={payMethod === 'whatsapp' ? 'text-[#25D366]' : 'text-ink-soft'} />
                 <div>
-                  <p className="font-medium text-sm">WhatsApp</p>
-                  <p className="text-xs text-gray-500">Coordiná el pago directamente</p>
+                  <p className="font-medium text-sm text-ink">WhatsApp</p>
+                  <p className="text-xs text-ink-soft">Coordiná el pago directamente</p>
                 </div>
               </label>
             </div>
@@ -201,7 +192,7 @@ const Checkout = () => {
                 const nombre = item.producto?.nombre || '';
                 return (
                   <li key={item.producto?._id || item.producto} className="py-2 flex justify-between text-sm">
-                    <span className="text-gray-600 truncate max-w-[60%]">{nombre} <span className="text-gray-400">x{item.cantidad}</span></span>
+                    <span className="text-ink-soft truncate max-w-[60%]">{nombre} <span className="text-ink-soft/60">x{item.cantidad}</span></span>
                     <span className="font-medium">{formatCurrency(price * item.cantidad)}</span>
                   </li>
                 );
@@ -215,7 +206,7 @@ const Checkout = () => {
               </div>
             )}
 
-            <div className="flex justify-between font-bold text-lg border-t pt-3 mb-5">
+            <div className="flex justify-between font-bold text-lg border-t border-surface-border pt-3 mb-5">
               <span>Total</span>
               <span>{formatCurrency(finalTotal)}</span>
             </div>
@@ -223,7 +214,7 @@ const Checkout = () => {
             <button
               onClick={() => handleOrder(payMethod)}
               disabled={isLoading}
-              className={`w-full flex items-center justify-center gap-2 font-bold px-6 py-3 rounded-full transition-all active:scale-95 disabled:opacity-50 ${
+              className={`w-full flex items-center justify-center gap-2 text-sm font-bold px-4 py-3 rounded-full transition-all active:scale-95 disabled:opacity-50 ${
                 payMethod === 'whatsapp'
                   ? 'bg-green-500 hover:bg-green-400 text-white'
                   : 'btn-primary'
@@ -239,7 +230,7 @@ const Checkout = () => {
             {!user && (
               <p className="text-xs text-center text-gray-400 mt-3">
                 ¿Tenés cuenta?{' '}
-                <a href="/login" className="text-ink font-semibold hover:underline">Iniciá sesión</a> para guardar tu historial
+                <a href="/login" className="text-primary-400 font-semibold hover:underline">Iniciá sesión</a> para guardar tu historial
               </p>
             )}
           </div>

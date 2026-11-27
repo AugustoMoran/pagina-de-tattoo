@@ -86,7 +86,7 @@ const WhatsAppPopup = () => {
       aria-label="Chat por WhatsApp"
     >
       {/* Card */}
-      <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-ink">
+      <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-surface-border bg-surface">
 
         {/* Imagen de fondo con overlay */}
         <div className="relative h-36 overflow-hidden">
@@ -98,10 +98,10 @@ const WhatsAppPopup = () => {
             onError={(e) => { e.target.src = DEFAULT_IMAGE; }}
           />
           {/* Overlay degradado */}
-          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/75 to-black/35" />
 
           {/* Badge premium */}
-          <div className="absolute top-3 left-3 flex items-center gap-1 bg-primary-400 text-gray-900 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+          <div className="absolute top-3 left-3 flex items-center gap-1 bg-primary-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
             <HiSparkles size={10} />
             Exclusivo
           </div>
@@ -119,12 +119,12 @@ const WhatsAppPopup = () => {
         {/* Contenido */}
         <div className="px-4 pt-3 pb-4">
           {/* Título */}
-          <h3 className="text-white font-bold text-sm leading-snug mb-1">
+          <h3 className="text-ink font-bold text-sm leading-snug mb-1">
             {cfg.titulo}
           </h3>
 
           {/* Descripción */}
-          <p className="text-gray-400 text-xs leading-relaxed mb-3">
+          <p className="text-ink-soft text-xs leading-relaxed mb-3">
             {cfg.descripcion}
           </p>
 
@@ -141,7 +141,7 @@ const WhatsAppPopup = () => {
           </a>
 
           {/* Micro-texto de confianza */}
-          <p className="text-center text-gray-500 text-[10px] mt-2">
+          <p className="text-center text-ink-soft/70 text-[10px] mt-2">
             Respondemos en minutos · Sin compromisos
           </p>
         </div>
